@@ -9,12 +9,22 @@ app.secret_key = os.environ.get('SECRET_KEY', 'clave_secreta_sistema_tenis_upvm'
 
 
 def get_db_connection():
+    host = os.environ.get('DB_HOST') or os.environ.get('MYSQLHOST') or 'localhost'
+    user = os.environ.get('DB_USER') or os.environ.get('MYSQLUSER') or 'root'
+    password = (
+        os.environ.get('DB_PASSWORD')
+        if os.environ.get('DB_PASSWORD') is not None
+        else os.environ.get('MYSQLPASSWORD', '12345678')
+    )
+    database = os.environ.get('DB_NAME') or os.environ.get('MYSQLDATABASE') or 'sistema_tenis_db'
+    port_raw = os.environ.get('DB_PORT') or os.environ.get('MYSQLPORT') or '3306'
+
     return pymysql.connect(
-        host=os.environ.get('DB_HOST', 'localhost'),
-        user=os.environ.get('DB_USER', 'root'),
-        password=os.environ.get('DB_PASSWORD', '12345678'),
-        database=os.environ.get('DB_NAME', 'sistema_tenis_db'),
-        port=int(os.environ.get('DB_PORT', 3306)),
+        host=host,
+        user=user,
+        password=password,
+        database=database,
+        port=int(port_raw),
         cursorclass=pymysql.cursors.DictCursor
     )
 
