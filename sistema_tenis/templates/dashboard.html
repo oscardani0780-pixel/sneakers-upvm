@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Métricas y Control (Admin) | Sneakers UPVM</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+            <link id="dynamic-favicon" rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_upvm.png') }}">
+<script>
+(function () {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "{{ url_for('static', filename='img/logo_upvm.png') }}";
+    img.onload = function () {
+        const size = 128;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+        ctx.restore();
+
+        const link = document.getElementById("dynamic-favicon");
+        if (link) {
+            link.href = canvas.toDataURL("image/png");
+        }
+    };
+})();
+</script>
+
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script>
+        $(document).on("mobileinit", function () {
+            $.mobile.ajaxEnabled = false;
+            $.mobile.linkBindingEnabled = false;
+            $.mobile.hashListeningEnabled = false;
+            $.mobile.pushStateEnabled = false;
+            $.mobile.ignoreContentEnabled = true;
+        });
+    </script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+
+        body, input, button, select, textarea, table, th, td, div, p, h1, h2, h3, a, span, li {
+            font-family: 'Outfit', sans-serif !important;
+        }
+        i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands {
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+        }
+        .far, .fa-regular {
+            font-weight: 400 !important;
+        }
+
+        html, body,
+        .ui-mobile-viewport,
+        .ui-overlay-a,
+        .ui-overlay-b,
+        .ui-page,
+        .ui-page-theme-a,
+        .ui-page-theme-b,
+        .ui-content {
+            background-color: #070913 !important;
+            background-image: none !important;
+            color: #f3f4f6 !important;
+            margin: 0 !important;
+            text-shadow: none !important;
+            transform: none !important;
+        }
+
+        body {
+            padding-top: 100px !important;
+            padding-bottom: 60px !important;
+        }
+
+        header,
+        header.main-header,
+        .ui-page header,
+        .ui-page header.main-header {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            z-index: 9999 !important;
+            background: rgba(7, 9, 19, 0.96) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.18);
+            transform: translateZ(0) !important;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .nav-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #fff;
+            cursor: pointer;
+        }
+        .logo span { color: #00f3ff; }
+        .logo-nav-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.45);
+            background: #070913;
+            flex-shrink: 0;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: rgba(17, 24, 39, 0.95) !important;
+            border: 1px solid rgba(0, 243, 255, 0.45) !important;
+            color: #00f3ff !important;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: 0.25s;
+            padding: 0 !important;
+        }
+        .menu-toggle:hover {
+            background: #00f3ff !important;
+            color: #070913 !important;
+        }
+
+        nav ul { display: flex; align-items: center; gap: 20px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+        nav ul li a { color: #f3f4f6 !important; text-decoration: none !important; font-weight: 500; font-size: 0.95rem; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        nav ul li a:hover { color: #00f3ff !important; }
+
+        .cart-nav-badge {
+            background: #ff007f; color: #fff; font-size: 0.75rem; font-weight: 700;
+            padding: 2px 7px; border-radius: 50px; margin-left: 4px; box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+
+        .container {
+            width: calc(100% - 40px) !important;
+            max-width: 1150px !important;
+            background: rgba(17, 24, 39, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.15);
+            margin: 30px auto 0 auto !important;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .profile-photo-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #00f3ff;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+            margin: 0 auto 12px auto;
+            display: block;
+            background: #070913;
+        }
+
+        .header-info { text-align: center; color: #9ca3af; font-size: 0.88rem; margin-bottom: 14px; }
+        h1 {
+            font-size: 1.9rem;
+            text-align: center;
+            background: linear-gradient(135deg, #00f3ff, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0 0 26px 0;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            background: rgba(31, 41, 55, 0.55);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 16px;
+            padding: 20px 16px;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .metric-card.clickable {
+            cursor: pointer;
+            border-color: rgba(74, 222, 128, 0.45);
+        }
+        .metric-card:hover {
+            border-color: #00f3ff;
+            box-shadow: 0 0 18px rgba(0, 243, 255, 0.22);
+            transform: translateY(-3px);
+        }
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #00f3ff;
+            margin-bottom: 6px;
+        }
+        .metric-label {
+            font-size: 0.82rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metric-hint {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #4ade80;
+            font-weight: 700;
+        }
+
+        .chart-section {
+            background: rgba(31, 41, 55, 0.45);
+            border: 1px solid rgba(0, 243, 255, 0.25);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 32px;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .top-page-badge {
+            background: rgba(74, 222, 128, 0.14);
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            color: #4ade80;
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 290px;
+            width: 100%;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #f472b6;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .table-responsive-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(31, 41, 55, 0.45);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(55, 65, 81, 0.6);
+            font-size: 0.9rem;
+        }
+        th {
+            background: rgba(0, 243, 255, 0.12);
+            color: #00f3ff;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+        tr:hover { background: rgba(0, 243, 255, 0.05); }
+        .col-hora { color: #9ca3af; width: 120px; }
+        .col-quien { color: #ffffff; font-weight: 700; }
+        .col-que { color: #38bdf8; }
+        .col-pagina { color: #4ade80; font-family: monospace !important; font-weight: 600; }
+
+        .modal-blur-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 9, 19, 0.72);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+        .modal-blur-backdrop.active {
+            display: flex;
+        }
+        .modal-visitantes-card {
+            width: 100%;
+            max-width: 720px;
+            max-height: 82vh;
+            overflow-y: auto;
+            background: rgba(17, 24, 39, 0.96);
+            border: 1px solid rgba(0, 243, 255, 0.45);
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.25);
+        }
+        .modal-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+        .modal-top h3 {
+            margin: 0;
+            color: #00f3ff;
+            font-size: 1.3rem;
+        }
+        .btn-cerrar-modal {
+            background: rgba(248, 113, 113, 0.15) !important;
+            border: 1px solid rgba(248, 113, 113, 0.45) !important;
+            color: #f87171 !important;
+            padding: 6px 12px !important;
+            border-radius: 8px !important;
+            font-weight: 700 !important;
+            cursor: pointer;
+            margin: 0 !important;
+            box-shadow: none !important;
+        }
+
+        @media (max-width: 900px) {
+            body { padding-top: 84px !important; }
+            .nav-container { padding: 14px 20px; }
+            .nav-top-bar { width: 100%; }
+            .menu-toggle { display: inline-flex; }
+            nav.main-nav {
+                display: none;
+                width: 100%;
+                padding-top: 12px;
+                border-top: 1px solid rgba(0, 243, 255, 0.15);
+            }
+            nav.main-nav.active {
+                display: block;
+            }
+            nav.main-nav ul {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            nav.main-nav ul li a {
+                padding: 8px 10px;
+                border-radius: 8px;
+                background: rgba(17, 24, 39, 0.65);
+            }
+            .container {
+                width: calc(100% - 24px) !important;
+                margin-top: 16px !important;
+                padding: 20px 16px;
+                border-radius: 18px;
+            }
+            h1 { font-size: 1.5rem; }
+            .chart-wrapper { height: 240px; }
+        }
+    </style>
+</head>
+<body data-role="page" data-theme="b" data-enhance="false" style="background-color: #070913 !important;">
+    <header class="main-header">
+        <div class="nav-container">
+            <div class="nav-top-bar">
+                <div class="logo" onclick="window.location.href='{{ url_for('index') }}'">
+                    <img src="{{ url_for('static', filename='img/logo_upvm.png') }}" alt="Logo Sneakers UPVM" class="logo-nav-img">
+                    <span>Sneakers <span>UPVM</span></span>
+                </div>
+
+                <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="main-nav" id="mainNav">
+                <ul>
+                    <li><a href="{{ url_for('productos') }}"><i class="fas fa-shoe-prints"></i> Catálogo</a></li>
+                    <li><a href="{{ url_for('ubicacion_modulo') }}"><i class="fas fa-map-marker-alt"></i> Ubicación</a></li>
+                    <li><a href="{{ url_for('encuesta_modulo') }}"><i class="fas fa-poll"></i> Encuesta</a></li>
+                    <li><a href="{{ url_for('chat_modulo') }}"><i class="fas fa-comments"></i> Chat</a></li>
+                    <li><a href="{{ url_for('video_modulo') }}"><i class="fas fa-camera-retro"></i> Fotos</a></li>
+                    <li><a href="{{ url_for('carrito_modulo') }}" style="color: #00f3ff !important; font-weight: 700;"><i class="fas fa-shopping-cart"></i> Carrito <span class="cart-nav-badge" id="cartCount">0</span></a></li>
+
+                    {% if rol == 'admin' %}
+                        <li><a href="{{ url_for('admin_menu') }}" style="color: #4ade80 !important; font-weight: 700;"><i class="fas fa-tools"></i> Panel Admin</a></li>
+                        <li><a href="{{ url_for('dashboard') }}" style="color: #c084fc !important; font-weight: 700;"><i class="fas fa-chart-line"></i> Métricas</a></li>
+                    {% endif %}
+
+                    <li><a href="{{ url_for('logout') }}" style="color: #f87171 !important;"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container" data-role="content">
+        <div class="top-bar"></div>
+
+        <img class="profile-photo-circle" src="{{ url_for('static', filename='img/logo_upvm.png') }}" alt="Logo Sneakers UPVM">
+
+        <div class="header-info">Se actualiza automáticamente en tiempo real con datos de XAMPP.</div>
+
+        <h1>Dashboard de Administración y Métricas</h1>
+
+        <div class="metrics-grid">
+            <div class="metric-card clickable" onclick="abrirModalVisitantes()">
+                <div class="metric-value">{{ visitantes_unicos }} / {{ total_usuarios }}</div>
+                <div class="metric-label">Visitantes únicos / Registrados</div>
+                <span class="metric-hint"><i class="fas fa-users"></i> Clic para ver quiénes son</span>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{ total_productos }}</div>
+                <div class="metric-label">Productos totales</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{ total_clics }}</div>
+                <div class="metric-label">Total de clics / Eventos</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" style="color: #4ade80; font-size: 1.35rem;">{{ pagina_mas_vista }}</div>
+                <div class="metric-label">Página más vista ({{ vistas_pagina_top }} clics)</div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <div class="chart-header">
+                <div class="section-title" style="margin: 0;"><i class="fas fa-chart-bar"></i> Páginas Más Vistas y Clics Registrados</div>
+                <div class="top-page-badge">
+                    <i class="fas fa-fire"></i> Más vista: {{ pagina_mas_vista }} ({{ vistas_pagina_top }})
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="graficaPaginasVistas"></canvas>
+            </div>
+        </div>
+
+        <div class="section-title"><i class="fas fa-clock-rotate-left"></i> Actividad Reciente por Usuario / Cliente</div>
+
+        <div class="table-responsive-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Cliente / Usuario</th>
+                        <th>Acción</th>
+                        <th>Página / Ruta</th>
+                        <th>Detalle del Evento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ev in eventos %}
+                    <tr>
+                        <td class="col-hora">{{ ev.creado_en.strftime('%H:%M:%S') if ev.creado_en else 'N/D' }}</td>
+                        <td class="col-quien">
+                            <i class="fas fa-user" style="color: #00f3ff; margin-right: 6px;"></i>{{ ev.nombre_usuario }} <small style="color:#9ca3af;">(#{{ ev.usuario_id }})</small>
+                        </td>
+                        <td class="col-que"><i class="fas fa-eye"></i> registro</td>
+                        <td class="col-pagina">{{ ev.ruta }}</td>
+                        <td>{{ ev.evento }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #9ca3af;">No hay eventos registrados todavía.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal-blur-backdrop" id="modalVisitantes" onclick="cerrarModalVisitantesFondo(event)">
+        <div class="modal-visitantes-card">
+            <div class="modal-top">
+                <h3><i class="fas fa-id-badge"></i> Visitantes Únicos y Usuarios Registrados</h3>
+                <button type="button" class="btn-cerrar-modal" onclick="cerrarModalVisitantes()">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+            <div class="table-responsive-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Rol</th>
+                            <th>Clics / Eventos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoModalVisitantes"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const etiquetasRutas = {{ rutas_labels | default([]) | tojson }};
+        const valoresRutas = {{ rutas_valores | default([]) | tojson }};
+        const visitantesData = {{ lista_visitantes | default([]) | tojson }};
+
+        function actualizarContadorCarrito() {
+            let carrito = JSON.parse(localStorage.getItem('sneakers_carrito')) || [];
+            let totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+            $('#cartCount').text(totalItems);
+        }
+
+        const ctx = document.getElementById('graficaPaginasVistas');
+        if (ctx && etiquetasRutas.length > 0) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: etiquetasRutas,
+                    datasets: [{
+                        label: 'Clics / Visitas registrados',
+                        data: valoresRutas,
+                        backgroundColor: etiquetasRutas.map((_, idx) =>
+                            idx === 0 ? 'rgba(74, 222, 128, 0.72)' : 'rgba(0, 243, 255, 0.55)'
+                        ),
+                        borderColor: etiquetasRutas.map((_, idx) =>
+                            idx === 0 ? '#4ade80' : '#00f3ff'
+                        ),
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#f3f4f6' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#cbd5e1' },
+                            grid: { color: 'rgba(255,255,255,0.06)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#cbd5e1', precision: 0 },
+                            grid: { color: 'rgba(255,255,255,0.08)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        const modalVisitantes = document.getElementById('modalVisitantes');
+        const cuerpoModalVisitantes = document.getElementById('cuerpoModalVisitantes');
+
+        function abrirModalVisitantes() {
+            cuerpoModalVisitantes.innerHTML = '';
+            if (!visitantesData.length) {
+                cuerpoModalVisitantes.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#9ca3af;">No hay usuarios registrados.</td></tr>';
+            } else {
+                visitantesData.forEach(u => {
+                    const estadoVisita = u.total_eventos > 0
+                        ? `<span style="color:#4ade80;font-weight:700;">${u.total_eventos} (Visitante activo)</span>`
+                        : `<span style="color:#9ca3af;">0 (Sin visitas aún)</span>`;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${u.nombre}</strong></td>
+                        <td style="color:#cbd5e1;">${u.correo}</td>
+                        <td><span style="color:#00f3ff;font-weight:600;">${u.rol}</span></td>
+                        <td>${estadoVisita}</td>
+                    `;
+                    cuerpoModalVisitantes.appendChild(tr);
+                });
+            }
+            modalVisitantes.classList.add('active');
+        }
+
+        function cerrarModalVisitantes() {
+            modalVisitantes.classList.remove('active');
+        }
+
+        function cerrarModalVisitantesFondo(event) {
+            if (event.target === modalVisitantes) {
+                cerrarModalVisitantes();
+            }
+        }
+
+        $(document).ready(function() {
+            actualizarContadorCarrito();
+
+            $('#menuToggle').on('click', function() {
+                const abierto = $('#mainNav').toggleClass('active').hasClass('active');
+                $(this).attr('aria-expanded', abierto);
+                $(this).find('i').toggleClass('fa-bars', !abierto).toggleClass('fa-times', abierto);
+            });
+
+            $('#mainNav a').on('click', function() {
+                $('#mainNav').removeClass('active');
+                $('#menuToggle').attr('aria-expanded', 'false');
+                $('#menuToggle i').removeClass('fa-times').addClass('fa-bars');
+            });
+        });
+    </script>
+</body>
+</html>

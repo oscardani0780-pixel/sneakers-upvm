@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubicación Clientes | Sneakers UPVM</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+<link id="dynamic-favicon" rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_upvm.png') }}">
+<script>
+(function () {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "{{ url_for('static', filename='img/logo_upvm.png') }}";
+    img.onload = function () {
+        const size = 128;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+        ctx.restore();
+
+        const link = document.getElementById("dynamic-favicon");
+        if (link) {
+            link.href = canvas.toDataURL("image/png");
+        }
+    };
+})();
+</script>
+
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script>
+        $(document).on("mobileinit", function () {
+            $.mobile.ajaxEnabled = false;
+            $.mobile.linkBindingEnabled = false;
+            $.mobile.hashListeningEnabled = false;
+            $.mobile.pushStateEnabled = false;
+            $.mobile.ignoreContentEnabled = true;
+        });
+    </script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+
+        body, input, button, select, textarea, table, th, td, div, p, h1, h2, a, span, li {
+            font-family: 'Outfit', sans-serif !important;
+        }
+        i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands {
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+        }
+        .far, .fa-regular {
+            font-weight: 400 !important;
+        }
+
+        html, body,
+        .ui-mobile-viewport,
+        .ui-overlay-a,
+        .ui-overlay-b,
+        .ui-page,
+        .ui-page-theme-a,
+        .ui-page-theme-b,
+        .ui-content {
+            background-color: #070913 !important;
+            background-image: none !important;
+            color: #f3f4f6 !important;
+            margin: 0 !important;
+            text-shadow: none !important;
+            transform: none !important;
+        }
+
+        body {
+            padding-top: 100px !important;
+            padding-bottom: 60px !important;
+        }
+
+        header,
+        header.main-header,
+        .ui-page header,
+        .ui-page header.main-header {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            z-index: 9999 !important;
+            background: rgba(7, 9, 19, 0.96) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.18);
+            transform: translateZ(0) !important;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .nav-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #fff;
+            cursor: pointer;
+        }
+        .logo span { color: #00f3ff; }
+        .logo-nav-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.45);
+            background: #070913;
+            flex-shrink: 0;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: rgba(17, 24, 39, 0.95) !important;
+            border: 1px solid rgba(0, 243, 255, 0.45) !important;
+            color: #00f3ff !important;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: 0.25s;
+            padding: 0 !important;
+        }
+        .menu-toggle:hover {
+            background: #00f3ff !important;
+            color: #070913 !important;
+        }
+
+        nav ul { display: flex; align-items: center; gap: 20px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+        nav ul li a { color: #f3f4f6 !important; text-decoration: none !important; font-weight: 500; font-size: 0.95rem; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        nav ul li a:hover { color: #00f3ff !important; }
+
+        .cart-nav-badge {
+            background: #ff007f; color: #fff; font-size: 0.75rem; font-weight: 700;
+            padding: 2px 7px; border-radius: 50px; margin-left: 4px; box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1150px;
+            margin: 30px auto 0 auto;
+            background: rgba(17, 24, 39, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.15);
+        }
+
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-volver {
+            display: inline-flex !important; align-items: center; gap: 8px;
+            background: rgba(31, 41, 55, 0.9) !important;
+            border: 1px solid rgba(0, 243, 255, 0.45) !important;
+            color: #00f3ff !important;
+            padding: 9px 16px !important;
+            border-radius: 10px !important;
+            text-decoration: none !important;
+            font-weight: 600 !important;
+            transition: 0.3s;
+            margin: 0 !important;
+        }
+        .btn-volver:hover { background: rgba(0, 243, 255, 0.14) !important; box-shadow: 0 0 12px rgba(0, 243, 255, 0.3); }
+
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #00f3ff, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 8px 0 25px 0;
+        }
+
+        .mini-map-section {
+            display: none;
+            background: rgba(31, 41, 55, 0.5);
+            border: 1px solid rgba(74, 222, 128, 0.35);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 28px;
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.12);
+        }
+        .mini-map-section.visible {
+            display: block;
+        }
+        .map-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        .map-client-title {
+            margin: 0 0 4px 0;
+            font-size: 1.25rem;
+            color: #4ade80;
+            font-weight: 800;
+        }
+        .map-coords-text {
+            margin: 0;
+            font-size: 0.88rem;
+            color: #cbd5e1;
+            font-family: monospace !important;
+        }
+
+        .user-purchases-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .compra-ubicacion-btn {
+            background: rgba(7, 9, 19, 0.85) !important;
+            border: 1px solid rgba(0, 243, 255, 0.25) !important;
+            color: #d1d5db !important;
+            padding: 8px 12px !important;
+            border-radius: 10px !important;
+            font-size: 0.84rem;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: left;
+            margin: 0 !important;
+            box-shadow: none !important;
+        }
+        .compra-ubicacion-btn:hover, .compra-ubicacion-btn.active {
+            background: rgba(74, 222, 128, 0.16) !important;
+            border-color: #4ade80 !important;
+            color: #4ade80 !important;
+            font-weight: 700;
+        }
+
+        #miniMapaCliente {
+            width: 100%;
+            height: 340px;
+            border-radius: 14px;
+            border: 2px solid rgba(0, 243, 255, 0.45);
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .table-responsive-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            background: rgba(31, 41, 55, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(55, 65, 81, 0.6);
+            vertical-align: middle;
+        }
+        th { background: rgba(0, 243, 255, 0.12); color: #00f3ff; font-weight: 700; }
+        tr:hover { background: rgba(0, 243, 255, 0.05); }
+
+        .cliente-nombre-col {
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+
+        .productos-comprados-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .producto-item-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            background: rgba(7, 9, 19, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 8px;
+            padding: 7px 11px;
+            font-size: 0.88rem;
+        }
+        .producto-ref { color: #f3f4f6; font-weight: 600; }
+        .coordenada { color: #4ade80; font-family: monospace !important; font-size: 0.82rem; }
+        .fecha-item { color: #9ca3af; font-size: 0.8rem; }
+
+        .btn-ver-mapa-fila {
+            background: rgba(0, 243, 255, 0.14) !important;
+            border: 1px solid rgba(0, 243, 255, 0.45) !important;
+            color: #00f3ff !important;
+            padding: 8px 14px !important;
+            border-radius: 10px !important;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 6px;
+            margin: 0 !important;
+            box-shadow: none !important;
+        }
+        .btn-ver-mapa-fila:hover {
+            background: rgba(0, 243, 255, 0.28) !important;
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.25) !important;
+        }
+
+        @media (max-width: 900px) {
+            body { padding-top: 84px !important; }
+            .nav-container { padding: 14px 20px; }
+            .nav-top-bar { width: 100%; }
+            .menu-toggle { display: inline-flex; }
+            nav.main-nav {
+                display: none;
+                width: 100%;
+                padding-top: 12px;
+                border-top: 1px solid rgba(0, 243, 255, 0.15);
+            }
+            nav.main-nav.active {
+                display: block;
+            }
+            nav.main-nav ul {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            nav.main-nav ul li a {
+                padding: 8px 10px;
+                border-radius: 8px;
+                background: rgba(17, 24, 39, 0.65);
+            }
+            .container {
+                margin-top: 16px;
+                padding: 20px 16px;
+                border-radius: 18px;
+            }
+            h1 { font-size: 1.55rem; }
+            #miniMapaCliente { height: 270px; }
+        }
+    </style>
+</head>
+<body data-role="page" data-theme="b" data-enhance="false" style="background-color: #070913 !important;">
+    <header class="main-header">
+        <div class="nav-container">
+            <div class="nav-top-bar">
+                <div class="logo" onclick="window.location.href='{{ url_for('index') }}'">
+                    <img src="{{ url_for('static', filename='img/logo_upvm.png') }}" alt="Logo Sneakers UPVM" class="logo-nav-img">
+                    <span>Sneakers <span>UPVM</span></span>
+                </div>
+
+                <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="main-nav" id="mainNav">
+                <ul>
+                    <li><a href="{{ url_for('productos') }}"><i class="fas fa-shoe-prints"></i> Catálogo</a></li>
+                    <li><a href="{{ url_for('ubicacion_modulo') }}"><i class="fas fa-map-marker-alt"></i> Ubicación</a></li>
+                    <li><a href="{{ url_for('encuesta_modulo') }}"><i class="fas fa-poll"></i> Encuesta</a></li>
+                    <li><a href="{{ url_for('chat_modulo') }}"><i class="fas fa-comments"></i> Chat</a></li>
+                    <li><a href="{{ url_for('video_modulo') }}"><i class="fas fa-camera-retro"></i> Fotos</a></li>
+                    <li><a href="{{ url_for('carrito_modulo') }}" style="color: #00f3ff !important; font-weight: 700;"><i class="fas fa-shopping-cart"></i> Carrito <span class="cart-nav-badge" id="cartCount">0</span></a></li>
+
+                    {% if rol == 'admin' %}
+                        <li><a href="{{ url_for('admin_menu') }}" style="color: #4ade80 !important; font-weight: 700;"><i class="fas fa-tools"></i> Panel Admin</a></li>
+                        <li><a href="{{ url_for('dashboard') }}" style="color: #c084fc !important; font-weight: 700;"><i class="fas fa-chart-line"></i> Métricas</a></li>
+                    {% endif %}
+
+                    <li><a href="{{ url_for('logout') }}" style="color: #f87171 !important;"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container" data-role="content">
+        <div class="top-actions">
+            <a href="{{ url_for('admin_menu') }}" class="btn-volver"><i class="fas fa-arrow-left"></i> Volver al Menú Admin</a>
+        </div>
+
+        <h1><i class="fas fa-map-marked-alt"></i> Ubicación de Clientes con Compras</h1>
+
+        <div class="mini-map-section" id="seccionMiniMapa">
+            <div class="map-header-info">
+                <div>
+                    <h2 class="map-client-title" id="tituloClienteMapa"><i class="fas fa-location-dot"></i> Cliente</h2>
+                    <p class="map-coords-text" id="detalleUbicacionMapa">Referencia: -- | Lat: --, Lng: --</p>
+                </div>
+            </div>
+
+            <div class="user-purchases-tabs" id="listaComprasCliente"></div>
+
+            <div id="miniMapaCliente"></div>
+        </div>
+
+        <div class="table-responsive-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Productos Comprados y Ubicación</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cli in clientes_compras %}
+                    <tr id="fila-cliente-{{ cli.usuario_id }}">
+                        <td class="cliente-nombre-col">
+                            <i class="fas fa-user-circle" style="color: #00f3ff; margin-right: 6px;"></i>{{ cli.usuario }}
+                        </td>
+                        <td>
+                            <div class="productos-comprados-lista">
+                                {% for ub in cli.ubicaciones %}
+                                <div class="producto-item-row">
+                                    <span class="producto-ref"><i class="fas fa-shoe-prints" style="color: #00f3ff; margin-right: 5px;"></i>{{ ub.referencia }}</span>
+                                    <span class="coordenada">Lat: {{ ub.latitud }} | Lng: {{ ub.longitud }}</span>
+                                    <span class="fecha-item"><i class="far fa-clock"></i> {{ ub.fecha }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            <button type="button" class="btn-ver-mapa-fila" onclick="seleccionarClientePorId('{{ cli.usuario_id }}')">
+                                <i class="fas fa-map-location-dot"></i> Ver Mapa
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: #9ca3af; padding: 25px;">
+                            No hay ubicaciones de clientes con compras registradas todavía.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const datosClientes = {{ clientes_compras | default([]) | tojson }};
+        const seccionMiniMapa = document.getElementById('seccionMiniMapa');
+        const tituloClienteMapa = document.getElementById('tituloClienteMapa');
+        const detalleUbicacionMapa = document.getElementById('detalleUbicacionMapa');
+        const listaComprasCliente = document.getElementById('listaComprasCliente');
+
+        let mapaInstancia = null;
+        let marcadorInstancia = null;
+
+        function actualizarContadorCarrito() {
+            let carrito = JSON.parse(localStorage.getItem('sneakers_carrito')) || [];
+            let totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+            $('#cartCount').text(totalItems);
+        }
+
+        function inicializarOMoverMapa(lat, lng, popupTexto) {
+            const numLat = Number(lat);
+            const numLng = Number(lng);
+
+            if (lat === null || lng === null || isNaN(numLat) || isNaN(numLng)) {
+                detalleUbicacionMapa.textContent = "Este registro de compra no cuenta con coordenadas GPS válidas.";
+                return;
+            }
+
+            if (!mapaInstancia) {
+                mapaInstancia = L.map('miniMapaCliente').setView([numLat, numLng], 16);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(mapaInstancia);
+                marcadorInstancia = L.marker([numLat, numLng]).addTo(mapaInstancia);
+            } else {
+                mapaInstancia.setView([numLat, numLng], 16);
+                marcadorInstancia.setLatLng([numLat, numLng]);
+            }
+
+            marcadorInstancia.bindPopup(popupTexto).openPopup();
+            setTimeout(() => {
+                if (mapaInstancia) mapaInstancia.invalidateSize();
+            }, 180);
+        }
+
+        function mostrarUbicacionEspecifica(cliente, ubicacionObj, botonElement) {
+            $(listaComprasCliente).find('.compra-ubicacion-btn').removeClass('active');
+            if (botonElement) $(botonElement).addClass('active');
+
+            detalleUbicacionMapa.textContent = `${ubicacionObj.referencia} (${ubicacionObj.fecha}) — Lat: ${ubicacionObj.latitud}, Lng: ${ubicacionObj.longitud}`;
+            const popupHtml = `<strong>${cliente.usuario}</strong><br>${ubicacionObj.referencia}<br><small>${ubicacionObj.fecha}</small>`;
+            inicializarOMoverMapa(ubicacionObj.latitud, ubicacionObj.longitud, popupHtml);
+        }
+
+        function seleccionarClientePorId(usuarioId) {
+            const cliente = datosClientes.find(c => String(c.usuario_id) === String(usuarioId));
+            if (!cliente || !cliente.ubicaciones || !cliente.ubicaciones.length) return;
+
+            $('tbody tr[id^="fila-cliente-"]').show();
+            $(`#fila-cliente-${usuarioId}`).hide();
+
+            $(seccionMiniMapa).addClass('visible');
+            tituloClienteMapa.innerHTML = `<i class="fas fa-location-dot"></i> Ubicación de compra: ${cliente.usuario}`;
+
+            listaComprasCliente.innerHTML = '';
+            let ubicacionInicial = cliente.ubicaciones[0];
+            let botonInicial = null;
+
+            cliente.ubicaciones.forEach((ub, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'compra-ubicacion-btn';
+                btn.innerHTML = `<i class="fas fa-bag-shopping"></i> ${ub.referencia} <small style="opacity:0.8;">(${ub.fecha})</small>`;
+                btn.onclick = () => mostrarUbicacionEspecifica(cliente, ub, btn);
+                listaComprasCliente.appendChild(btn);
+
+                if (idx === 0) {
+                    ubicacionInicial = ub;
+                    botonInicial = btn;
+                }
+            });
+
+            mostrarUbicacionEspecifica(cliente, ubicacionInicial, botonInicial);
+            $('html, body').animate({
+                scrollTop: $(seccionMiniMapa).offset().top - 105
+            }, 300, function() {
+                if (mapaInstancia) mapaInstancia.invalidateSize();
+            });
+        }
+
+        $(document).ready(function() {
+            actualizarContadorCarrito();
+
+            $('#menuToggle').on('click', function() {
+                const abierto = $('#mainNav').toggleClass('active').hasClass('active');
+                $(this).attr('aria-expanded', abierto);
+                $(this).find('i').toggleClass('fa-bars', !abierto).toggleClass('fa-times', abierto);
+            });
+
+            $('#mainNav a').on('click', function() {
+                $('#mainNav').removeClass('active');
+                $('#menuToggle').attr('aria-expanded', 'false');
+                $('#menuToggle i').removeClass('fa-times').addClass('fa-bars');
+            });
+        });
+    </script>
+</body>
+</html>

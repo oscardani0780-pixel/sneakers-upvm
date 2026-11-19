@@ -1,0 +1,74 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sneakers UPVM{% endblock %}</title>
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_upvm.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+    <style>
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #fff;
+            cursor: pointer;
+        }
+        .logo span { color: #00f3ff; }
+        .logo-nav-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.45);
+            background: #070913;
+            flex-shrink: 0;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <div class="logo" onclick="window.location.href='{{ url_for('index') }}'">
+                <img src="{{ url_for('static', filename='img/logo_upvm.png') }}" alt="Logo Sneakers UPVM" class="logo-nav-img">
+                <span>Sneakers <span>UPVM</span></span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('productos') }}"><i class="fas fa-shoe-prints"></i> Catálogo</a></li>
+                    <li><a href="{{ url_for('ubicacion_modulo') }}"><i class="fas fa-map-marker-alt"></i> Ubicación</a></li>
+                    <li><a href="{{ url_for('encuesta_modulo') }}"><i class="fas fa-poll"></i> Encuesta</a></li>
+                    <li><a href="{{ url_for('chat_modulo') }}"><i class="fas fa-comments"></i> Chat</a></li>
+                    <li><a href="{{ url_for('video_modulo') }}"><i class="fas fa-camera-retro"></i> Fotos</a></li>
+                    <li><a href="{{ url_for('carrito_modulo') }}" style="color: #00f3ff; font-weight: 700;"><i class="fas fa-shopping-cart"></i> Carrito <span class="cart-nav-badge" id="cartCount">0</span></a></li>
+                    {% if rol == 'admin' %}
+                        <li><a href="{{ url_for('admin_menu') }}" style="color: #4ade80; font-weight: 700;"><i class="fas fa-tools"></i> Panel Admin</a></li>
+                        <li><a href="{{ url_for('dashboard') }}" style="color: #c084fc; font-weight: 700;"><i class="fas fa-chart-line"></i> Métricas</a></li>
+                    {% endif %}
+                    <li><a href="{{ url_for('logout') }}" style="color: #f87171;"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    {% block content %}{% endblock %}
+
+    <footer>
+        <p>&copy; 2026 <span>Sneakers UPVM</span>. Todos los derechos reservados.</p>
+        <p style="font-size: 0.8rem; color: #6b7280; margin-top: 3px;">Desarrollado para Ingeniería en Tecnologías de la Información e Innovación Digital.</p>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

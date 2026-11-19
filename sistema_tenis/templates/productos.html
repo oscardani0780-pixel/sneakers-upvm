@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Tenis | Sneakers UPVM</title>
+    
+    <!-- Iconos y Fuentes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link id="dynamic-favicon" rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_upvm.png') }}">
+<script>
+(function () {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "{{ url_for('static', filename='img/logo_upvm.png') }}";
+    img.onload = function () {
+        const size = 128;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+        ctx.restore();
+
+        const link = document.getElementById("dynamic-favicon");
+        if (link) {
+            link.href = canvas.toDataURL("image/png");
+        }
+    };
+})();
+</script>
+    <!-- jQuery Mobile CSS -->
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+
+    <!-- jQuery 1.11.1 (compatible con jQuery Mobile 1.4.5) -->
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+    <!-- Configuración para no romper enlaces Flask ni el diseño oscuro -->
+    <script>
+        $(document).on("mobileinit", function () {
+            $.mobile.ajaxEnabled = false;
+            $.mobile.linkBindingEnabled = false;
+            $.mobile.hashListeningEnabled = false;
+            $.mobile.pushStateEnabled = false;
+            $.mobile.ignoreContentEnabled = true;
+        });
+    </script>
+
+    <!-- jQuery Mobile JS -->
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+
+        html, body,
+        .ui-mobile-viewport,
+        .ui-overlay-a,
+        .ui-overlay-b,
+        .ui-page,
+        .ui-page-theme-a,
+        .ui-page-theme-b,
+        .ui-content {
+            background-color: #070913 !important;
+            background-image: none !important;
+            color: #f3f4f6 !important;
+            margin: 0;
+            overflow-x: hidden;
+            text-shadow: none !important;
+        }
+
+        body {
+            padding-top: 90px;
+        }
+
+        /* Barra de navegación superior fija y responsiva */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: rgba(7, 9, 19, 0.92); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.15);
+        }
+        .nav-container {
+            max-width: 1400px; margin: auto; padding: 18px 40px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+        }
+        .nav-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #fff;
+            cursor: pointer;
+        }
+        .logo span { color: #00f3ff; }
+        .logo-nav-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.45);
+            background: #070913;
+            flex-shrink: 0;
+        }
+        .menu-toggle {
+            display: none;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid rgba(0, 243, 255, 0.35);
+            color: #00f3ff;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+        .menu-toggle:hover {
+            background: rgba(0, 243, 255, 0.22);
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.4);
+        }
+        nav ul { display: flex; align-items: center; gap: 20px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+        nav ul li a { color: #f3f4f6; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        nav ul li a:hover { color: #00f3ff; }
+
+        /* Badge del Carrito */
+        .cart-nav-badge {
+            background: #ff007f; color: #fff; font-size: 0.75rem; font-weight: 700;
+            padding: 2px 7px; border-radius: 50px; margin-left: 4px; box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+
+        /* Notificación flotante Toast */
+        #toast-notification {
+            position: fixed; bottom: 30px; right: 30px; background: rgba(0, 243, 255, 0.95);
+            color: #070913; padding: 12px 24px; border-radius: 12px; font-weight: 700;
+            box-shadow: 0 5px 20px rgba(0, 243, 255, 0.4); z-index: 9999; display: none;
+            backdrop-filter: blur(10px); animation: fadeInOut 0.3s ease;
+        }
+
+        /* Contenedor principal */
+        .catalog-page-wrapper {
+            max-width: 1250px;
+            margin: 30px auto 70px auto;
+            padding: 0 20px;
+        }
+
+        .btn-volver {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            color: #00f3ff;
+            padding: 8px 18px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .btn-volver:hover {
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            transform: translateX(-3px);
+        }
+
+        .catalog-main-title {
+            font-size: 2.3rem;
+            font-weight: 800;
+            text-align: center;
+            background: linear-gradient(135deg, #00f3ff, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .catalog-subtitle {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        /* Selector de Marcas con Logos Visibles Directamente */
+        .brands-selector-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+        }
+        .brand-card-item {
+            width: 130px;
+            height: 75px;
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(0, 243, 255, 0.25);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            text-decoration: none;
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            padding: 8px;
+        }
+        
+        .brand-card-item img {
+            width: 50px;
+            height: 28px;
+            object-fit: contain;
+            margin-bottom: 4px;
+            transition: 0.3s;
+        }
+        
+        .brand-card-item span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #9ca3af;
+            transition: 0.3s;
+        }
+        .brand-card-item:hover, .brand-card-item.active {
+            border-color: #00f3ff;
+            transform: translateY(-4px);
+            background: rgba(0, 243, 255, 0.12);
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.35);
+        }
+        .brand-card-item.active img, .brand-card-item:hover img {
+            filter: drop-shadow(0 0 6px rgba(0, 243, 255, 0.8));
+            transform: scale(1.05);
+        }
+        .brand-card-item.active span {
+            color: #00f3ff;
+            font-weight: 700;
+        }
+
+        /* Barra de Vista */
+        .view-options-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            color: #9ca3af;
+        }
+        .view-buttons-group { display: flex; gap: 6px; }
+        .view-btn {
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid rgba(0, 243, 255, 0.25);
+            color: #9ca3af;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+        .view-btn:hover, .view-btn.active {
+            background: rgba(0, 243, 255, 0.15);
+            border-color: #00f3ff;
+            color: #00f3ff;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+
+        /* Estilos de Contenedor */
+        .grid-catalogo.mosaic-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 320px));
+            gap: 25px;
+            justify-content: start;
+        }
+
+        .grid-catalogo.list-view {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* Tarjeta en Mosaico */
+        .grid-catalogo.mosaic-view .card-producto {
+            background: rgba(17, 24, 39, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 243, 255, 0.22);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: 0.35s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            width: 100%;
+        }
+        .grid-catalogo.mosaic-view .card-producto:hover {
+            border-color: #00f3ff;
+            box-shadow: 0 15px 35px rgba(0, 243, 255, 0.25);
+            transform: translateY(-6px);
+        }
+        .grid-catalogo.mosaic-view .card-img-container {
+            width: 100%;
+            height: 190px;
+            background: #0d1322;
+            position: relative;
+            overflow: hidden;
+        }
+        .grid-catalogo.mosaic-view .card-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .grid-catalogo.mosaic-view .card-producto:hover .card-img-container img {
+            transform: scale(1.05);
+        }
+        .grid-catalogo.mosaic-view .card-body-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+        }
+        .grid-catalogo.mosaic-view h3 {
+            margin: 0 0 8px 0;
+            color: #ffffff;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+        .grid-catalogo.mosaic-view p.desc {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin: 0 0 12px 0;
+            line-height: 1.4;
+        }
+
+        /* Tarjeta en Lista */
+        .grid-catalogo.list-view .card-producto {
+            display: grid;
+            grid-template-columns: 200px 1fr 220px;
+            align-items: center;
+            background: rgba(17, 24, 39, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 243, 255, 0.22);
+            border-radius: 18px;
+            overflow: hidden;
+            padding: 15px;
+            gap: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            transition: 0.3s;
+            width: 100%;
+        }
+        .grid-catalogo.list-view .card-producto:hover {
+            border-color: #00f3ff;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.25);
+        }
+        .grid-catalogo.list-view .card-img-container {
+            width: 200px;
+            height: 130px;
+            border-radius: 12px;
+            background: #0d1322;
+            overflow: hidden;
+            position: relative;
+        }
+        .grid-catalogo.list-view .card-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .grid-catalogo.list-view .card-body-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0;
+        }
+        .grid-catalogo.list-view h3 {
+            margin: 0 0 6px 0;
+            color: #ffffff;
+            font-size: 1.2rem;
+        }
+        .grid-catalogo.list-view p.desc {
+            color: #9ca3af;
+            font-size: 0.88rem;
+            margin: 0 0 8px 0;
+        }
+        .grid-catalogo.list-view .card-footer-action {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            border: none;
+            padding: 0;
+        }
+
+        /* Elementos comunes */
+        .card-badges-top {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 6px;
+            z-index: 2;
+        }
+        .badge-tag-red {
+            background: rgba(255, 0, 127, 0.2);
+            border: 1px solid rgba(255, 0, 127, 0.5);
+            color: #ff4da6;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+        .badge-tag-cyan {
+            background: rgba(0, 243, 255, 0.15);
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            color: #00f3ff;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        .card-meta-info {
+            font-size: 0.82rem;
+            color: #cbd5e1;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 6px 10px;
+            border-radius: 8px;
+            display: flex;
+            gap: 15px;
+        }
+        .card-footer-action {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 12px;
+        }
+        .precio {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #4ade80;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.25);
+        }
+        .btn-comprar {
+            background: #00f3ff;
+            color: #070913;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        .btn-comprar:hover {
+            box-shadow: 0 0 22px rgba(0, 243, 255, 0.6);
+            transform: translateY(-2px);
+            background: #33f6ff;
+        }
+
+        .card-producto.hidden-product { display: none !important; }
+
+        @media (max-width: 950px) {
+            .nav-container {
+                padding: 15px 20px;
+            }
+            .nav-top-bar {
+                width: 100%;
+            }
+            .menu-toggle {
+                display: flex;
+            }
+            .main-nav {
+                display: none;
+                width: 100%;
+                padding-top: 12px;
+                border-top: 1px solid rgba(0, 243, 255, 0.15);
+            }
+            .main-nav.active {
+                display: block;
+            }
+            .main-nav ul {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .main-nav ul li {
+                width: 100%;
+            }
+            .main-nav ul li a {
+                padding: 8px 4px;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .grid-catalogo.list-view .card-producto { grid-template-columns: 1fr; }
+            .grid-catalogo.list-view .card-img-container { width: 100%; height: 180px; }
+            .grid-catalogo.list-view .card-footer-action { align-items: stretch; }
+        }
+    </style>
+    <link rel="icon" type="image/png" href="data:image/png;base64,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">
+</head>
+<body data-role="page" data-theme="b" data-enhance="false" style="background-color: #070913 !important;">
+    <!-- Notificación Toast -->
+    <div id="toast-notification"><i class="fas fa-cart-plus"></i> ¡Producto agregado al carrito!</div>
+
+    <header class="main-header">
+        <div class="nav-container">
+            <div class="nav-top-bar">
+                <div class="logo" onclick="window.location.href='{{ url_for('index') }}'">
+                    <img src="{{ url_for('static', filename='img/logo_upvm.png') }}" alt="Logo Sneakers UPVM" class="logo-nav-img">
+                    <span>Sneakers <span>UPVM</span></span>
+                </div>
+
+                <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="main-nav" id="mainNav">
+                <ul>
+                    <li><a href="{{ url_for('productos') }}" style="color: #00f3ff; font-weight: 700;"><i class="fas fa-shoe-prints"></i> Catálogo</a></li>
+                    <li><a href="{{ url_for('ubicacion_modulo') }}"><i class="fas fa-map-marker-alt"></i> Ubicación</a></li>
+                    <li><a href="{{ url_for('encuesta_modulo') }}"><i class="fas fa-poll"></i> Encuesta</a></li>
+                    <li><a href="{{ url_for('chat_modulo') }}"><i class="fas fa-comments"></i> Chat</a></li>
+                    <li><a href="{{ url_for('video_modulo') }}"><i class="fas fa-camera-retro"></i> Fotos</a></li>
+                    <!-- Enlace al Carrito -->
+                    <li><a href="{{ url_for('carrito_modulo') }}" style="color: #00f3ff; font-weight: 700;"><i class="fas fa-shopping-cart"></i> Carrito <span class="cart-nav-badge" id="cartCount">0</span></a></li>
+                    
+                    {% if rol == 'admin' %}
+                        <!-- Ahora apunta correctamente a la ruta del menú de administrador -->
+                        <li><a href="{{ url_for('admin_menu') }}" style="color: #4ade80; font-weight: 700;"><i class="fas fa-tools"></i> Panel Admin</a></li>
+                        <li><a href="{{ url_for('dashboard') }}" style="color: #c084fc; font-weight: 700;"><i class="fas fa-chart-line"></i> Métricas</a></li>
+                    {% endif %}
+
+                    <li><a href="{{ url_for('logout') }}" style="color: #f87171;"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="catalog-page-wrapper">
+        <a href="{{ url_for('index') }}" class="btn-volver"><i class="fas fa-arrow-left"></i> Volver al Menú Principal</a>
+
+        <h1 class="catalog-main-title">👟 Catálogo de Tenis - Sneakers UPVM</h1>
+        <p class="catalog-subtitle">Explora los modelos exclusivos de nuestras marcas principales y adquiere tu par favorito con validación GPS.</p>
+
+        <!-- SELECTOR DE MARCAS CON LOGOS VISIBLES DIRECTAMENTE -->
+        <div class="brands-selector-container">
+            <div class="brand-card-item active" onclick="filtrarMarca('todos', this)">
+                <img src="{{ url_for('static', filename='img/logo_todas.png') }}" alt="Todas">
+                <span>Todas</span>
+            </div>
+            <div class="brand-card-item" onclick="filtrarMarca('Nike', this)">
+                <img src="{{ url_for('static', filename='img/logo_nike.png') }}" alt="Nike">
+                <span>Nike</span>
+            </div>
+            <div class="brand-card-item" onclick="filtrarMarca('Adidas', this)">
+                <img src="{{ url_for('static', filename='img/logo_adidas.png') }}" alt="Adidas">
+                <span>Adidas</span>
+            </div>
+            <div class="brand-card-item" onclick="filtrarMarca('Puma', this)">
+                <img src="{{ url_for('static', filename='img/logo_puma.png') }}" alt="Puma">
+                <span>Puma</span>
+            </div>
+            <div class="brand-card-item" onclick="filtrarMarca('Jordan', this)">
+                <img src="{{ url_for('static', filename='img/logo_jordan.png') }}" alt="Jordan">
+                <span>Jordan</span>
+            </div>
+            <div class="brand-card-item" onclick="filtrarMarca('Skechers', this)">
+                <img src="{{ url_for('static', filename='img/logo_skechers.png') }}" alt="Skechers">
+                <span>Skechers</span>
+            </div>
+        </div>
+
+        <!-- BARRA DE OPCIONES DE VISTA -->
+        <div class="view-options-bar">
+            <span>Vista:</span>
+            <div class="view-buttons-group">
+                <button type="button" class="view-btn active" id="btnMosaic" onclick="cambiarVista('mosaic')" title="Vista Mosaico">
+                    <i class="fas fa-th-large"></i>
+                </button>
+                <button type="button" class="view-btn" id="btnList" onclick="cambiarVista('list')" title="Vista Lista">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- CUADRÍCULA / LISTA DE PRODUCTOS -->
+        <div class="grid-catalogo mosaic-view" id="gridProductos">
+            {% for p in productos %}
+            <div class="card-producto" data-marca="{{ p.nombre }}">
+                <div class="card-img-container">
+                    <div class="card-badges-top">
+                        <span class="badge-tag-red">Oferta</span>
+                        <span class="badge-tag-cyan">Solo en línea</span>
+                    </div>
+                    {% if p.imagen %}
+                        {% if p.imagen.startswith('http://') or p.imagen.startswith('https://') %}
+                            <!-- Si es una URL completa de internet -->
+                            <img src="{{ p.imagen }}" alt="{{ p.nombre }}">
+                        {% else %}
+                            <!-- Si es un archivo local de la carpeta static/imagenes/ -->
+                            <img src="{{ url_for('static', filename='imagenes/' + p.imagen) }}" alt="{{ p.nombre }}">
+                        {% endif %}
+                    {% else %}
+                         <!-- Imagen por defecto si no hay ninguna registrada -->
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80" alt="{{ p.nombre }}">
+                    {% endif %}
+                </div>
+
+                <div class="card-body-content">
+                    <div>
+                        <h3>{{ p.nombre }}</h3>
+                        <p class="desc">{{ p.descripcion[:75] }}...</p>
+                        <div class="card-meta-info">
+                            <span><i class="fas fa-ruler"></i> Talla: <strong>{{ p.talla }}</strong></span>
+                            <span><i class="fas fa-box"></i> Stock: <strong>{{ p.stock }}</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="card-footer-action">
+                        <div class="precio">${{ p.precio }} MXN</div>
+                        <button type="button" class="btn-comprar add-to-cart-btn" 
+                            data-id="{{ p.id }}" 
+                            data-nombre="{{ p.nombre }}" 
+                            data-precio="{{ p.precio }}" 
+                            data-talla="{{ p.talla }}"
+                            data-imagen="{{ p.imagen }}"
+                            onclick="window.location.href='{{ url_for('vista_comprar', producto_id=p.id) }}';">
+                            <i class="fas fa-map-marker-alt"></i> Comprar 🛒
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Script de Filtrado, Vistas, Menú Hamburguesa y Carrito -->
+    <script>
+        function actualizarContadorCarrito() {
+            let carrito = JSON.parse(localStorage.getItem('sneakers_carrito')) || [];
+            let totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+            $('#cartCount').text(totalItems);
+        }
+
+        $(document).ready(function() {
+            actualizarContadorCarrito();
+
+            // Menú hamburguesa responsivo
+            $('#menuToggle').on('click', function() {
+                const abierto = $('#mainNav').toggleClass('active').hasClass('active');
+                $(this).attr('aria-expanded', abierto);
+                $(this).find('i').toggleClass('fa-bars', !abierto).toggleClass('fa-times', abierto);
+            });
+
+            $('#mainNav a').on('click', function() {
+                $('#mainNav').removeClass('active');
+                $('#menuToggle').attr('aria-expanded', 'false');
+                $('#menuToggle i').removeClass('fa-times').addClass('fa-bars');
+            });
+        });
+
+        let marcaActual = 'todos';
+
+        function filtrarMarca(marca, elementoCard) {
+            marcaActual = marca;
+            document.querySelectorAll('.brand-card-item').forEach(el => el.classList.remove('active'));
+            elementoCard.classList.add('active');
+            aplicarFiltros();
+        }
+
+        function cambiarVista(tipo) {
+            const grid = document.getElementById('gridProductos');
+            const btnMosaic = document.getElementById('btnMosaic');
+            const btnList = document.getElementById('btnList');
+
+            if (tipo === 'mosaic') {
+                grid.classList.remove('list-view');
+                grid.classList.add('mosaic-view');
+                btnMosaic.classList.add('active');
+                btnList.classList.remove('active');
+            } else {
+                grid.classList.remove('mosaic-view');
+                grid.classList.add('list-view');
+                btnList.classList.add('active');
+                btnMosaic.classList.remove('active');
+            }
+        }
+
+        function aplicarFiltros() {
+            const cards = document.querySelectorAll('.card-producto');
+            cards.forEach(card => {
+                const nombreProducto = card.getAttribute('data-marca').toLowerCase();
+                if (marcaActual === 'todos' || nombreProducto.includes(marcaActual.toLowerCase())) {
+                    card.classList.remove('hidden-product');
+                } else {
+                    card.classList.add('hidden-product');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

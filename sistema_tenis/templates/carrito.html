@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sneakers UPVM | Tu Carrito</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <link id="dynamic-favicon" rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_upvm.png') }}">
+<script>
+(function () {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "{{ url_for('static', filename='img/logo_upvm.png') }}";
+    img.onload = function () {
+        const size = 128;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+        ctx.restore();
+
+        const link = document.getElementById("dynamic-favicon");
+        if (link) {
+            link.href = canvas.toDataURL("image/png");
+        }
+    };
+})();
+</script>
+
+    <!-- jQuery Mobile CSS -->
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+
+    <!-- jQuery 1.11.1 (compatible con jQuery Mobile 1.4.5) -->
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+    <!-- Configuración para no romper enlaces Flask ni el diseño oscuro -->
+    <script>
+        $(document).on("mobileinit", function () {
+            $.mobile.ajaxEnabled = false;
+            $.mobile.linkBindingEnabled = false;
+            $.mobile.hashListeningEnabled = false;
+            $.mobile.pushStateEnabled = false;
+            $.mobile.ignoreContentEnabled = true;
+        });
+    </script>
+
+    <!-- jQuery Mobile JS -->
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+
+        html, body,
+        .ui-mobile-viewport,
+        .ui-overlay-a,
+        .ui-overlay-b,
+        .ui-page,
+        .ui-page-theme-a,
+        .ui-page-theme-b,
+        .ui-content {
+            background-color: #070913 !important;
+            background-image: none !important;
+            color: #f3f4f6 !important;
+            margin: 0;
+            text-shadow: none !important;
+        }
+
+        body {
+            padding-top: 115px !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+        }
+        
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: rgba(7, 9, 19, 0.92); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.15);
+            transition: filter 0.4s ease;
+        }
+        .nav-container {
+            max-width: 1400px; margin: auto; padding: 18px 40px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+        }
+        .nav-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #fff;
+            cursor: pointer;
+        }
+        .logo span { color: #00f3ff; }
+        .logo-nav-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.45);
+            background: #070913;
+            flex-shrink: 0;
+        }
+
+        /* Botón menú hamburguesa */
+        .menu-toggle {
+            display: none;
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            color: #00f3ff;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: 0.25s;
+        }
+        .menu-toggle:hover {
+            background: #00f3ff;
+            color: #070913;
+        }
+
+        nav ul { display: flex; align-items: center; gap: 20px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+        nav ul li a { color: #f3f4f6; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        nav ul li a:hover { color: #00f3ff; }
+
+        .cart-nav-badge {
+            background: #ff007f; color: #fff; font-size: 0.75rem; font-weight: 700;
+            padding: 2px 7px; border-radius: 50px; margin-left: 4px; box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+
+        .cart-container {
+            max-width: 1100px; margin: 15px auto 30px auto; padding: 0 20px; width: 100%;
+            transition: filter 0.4s ease;
+        }
+
+        /* CLASE PARA DIFUMINAR EL FONDO CUANDO APARECE EL MODAL */
+        .blur-background {
+            filter: blur(10px);
+            pointer-events: none;
+            user-select: none;
+        }
+        
+        .cart-header { display: flex; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .cart-header h1 { font-size: 2.2rem; color: #fff; margin: 0; display: flex; align-items: center; gap: 12px; }
+        .cart-header h1 i { color: #00f3ff; }
+
+        .cart-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        
+        .cart-items-list { display: flex; flex-direction: column; gap: 15px; }
+        .cart-item-card {
+            background: rgba(17, 24, 39, 0.85); border: 1px solid rgba(0, 243, 255, 0.25);
+            border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 20px;
+            backdrop-filter: blur(12px); box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+        .cart-item-img { width: 90px; height: 90px; border-radius: 12px; object-fit: cover; border: 1px solid rgba(0, 243, 255, 0.3); background: #111; }
+        .cart-item-details { flex: 1; }
+        .cart-item-details h3 { font-size: 1.2rem; color: #fff; margin: 0 0 5px 0; }
+        .cart-item-details p { color: #9ca3af; font-size: 0.85rem; margin: 0 0 8px 0; }
+        .cart-item-price { font-size: 1.2rem; font-weight: 800; color: #4ade80; }
+        
+        .cart-item-actions { display: flex; align-items: center; gap: 15px; }
+        .qty-badge { background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+        .btn-remove { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .btn-remove:hover { background: #f87171; color: #fff; }
+
+        .cart-summary-box {
+            background: rgba(17, 24, 39, 0.9); border: 1px solid rgba(0, 243, 255, 0.35);
+            border-radius: 20px; padding: 25px; height: fit-content;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
+        }
+        .cart-summary-box h3 { font-size: 1.4rem; color: #00f3ff; margin: 0 0 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 0.95rem; color: #cbd5e1; }
+        .summary-total { display: flex; justify-content: space-between; margin: 20px 0; font-size: 1.3rem; font-weight: 800; color: #4ade80; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
+        
+        .btn-checkout,
+        a.btn-checkout,
+        button.btn-checkout,
+        .btn-checkout.ui-link,
+        .btn-checkout.ui-btn {
+            display: block; width: 100%; background: linear-gradient(135deg, #00f3ff, #0ea5e9);
+            color: #070913 !important; -webkit-text-fill-color: #070913 !important;
+            padding: 14px; border-radius: 50px; font-weight: 700; text-align: center; text-decoration: none;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4); transition: 0.3s; margin-bottom: 12px; border: none; cursor: pointer;
+            text-shadow: none !important;
+        }
+        .btn-checkout:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0, 243, 255, 0.7); }
+        .btn-keep-shopping {
+            display: block; width: 100%; border: 1px solid rgba(0, 243, 255, 0.4); color: #00f3ff !important; padding: 12px;
+            border-radius: 50px; font-weight: 600; text-align: center; text-decoration: none; transition: 0.3s;
+        }
+        .btn-keep-shopping:hover { background: rgba(0, 243, 255, 0.1); }
+
+        .empty-cart { text-align: center; padding: 60px 20px; grid-column: 1 / -1; }
+        .empty-cart i { font-size: 4rem; color: rgba(0, 243, 255, 0.3); margin-bottom: 20px; }
+        .empty-cart h2 { color: #fff; font-size: 1.6rem; margin-bottom: 10px; }
+        .empty-cart p { color: #9ca3af; margin-bottom: 25px; }
+
+        #mensaje-gps-carrito { text-align: center; color: #00f3ff; font-size: 0.85rem; margin-top: 10px; font-weight: 600; min-height: 18px; }
+
+        /* MODAL DE ÉXITO FLOTANTE */
+        #modalExitoCarrito {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(7, 9, 19, 0.4); backdrop-filter: blur(8px);
+            z-index: 99999; display: none; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-content-box {
+            width: 100%; max-width: 520px; background: rgba(17, 24, 39, 0.95);
+            border: 1px solid rgba(74, 222, 128, 0.5); border-radius: 24px; padding: 35px;
+            box-shadow: 0 0 50px rgba(74, 222, 128, 0.3); text-align: center; animation: scaleIn 0.3s ease;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-content-box h2 { font-size: 1.8rem; background: linear-gradient(135deg, #4ade80, #00f3ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+        .modal-content-box p { color: #9ca3af; font-size: 0.95rem; margin-bottom: 20px; }
+        .modal-ticket { background: rgba(31, 41, 55, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); padding: 16px; border-radius: 12px; margin-bottom: 20px; text-align: left; max-height: 180px; overflow-y: auto; }
+        .modal-ticket p { margin: 6px 0; color: #9ca3af; font-size: 0.88rem; }
+        .modal-ticket span { color: #f3f4f6; font-weight: 600; }
+        .btn-modal-regresar {
+            background: linear-gradient(135deg, #00f3ff, #3b82f6); border: none; color: #070913 !important;
+            font-weight: 700; padding: 12px; border-radius: 10px; cursor: pointer; text-decoration: none;
+            display: block; width: 100%; font-size: 1rem; transition: 0.3s;
+        }
+        .btn-modal-regresar:hover { box-shadow: 0 0 20px rgba(0, 243, 255, 0.5); transform: translateY(-2px); }
+
+        footer { border-top: 1px solid rgba(0, 243, 255, 0.15); background: rgba(7, 9, 19, 0.95); padding: 25px 20px; text-align: center; color: #9ca3af; font-size: 0.9rem; margin-top: 50px; }
+        footer span { color: #00f3ff; font-weight: 600; }
+
+        @media (max-width: 900px) {
+            body { padding-top: 95px !important; }
+            .nav-container { padding: 14px 20px; }
+            .nav-top-bar { width: 100%; }
+            .menu-toggle { display: inline-flex; }
+            nav.main-nav {
+                display: none;
+                width: 100%;
+                padding-top: 12px;
+                border-top: 1px solid rgba(0, 243, 255, 0.15);
+            }
+            nav.main-nav.active {
+                display: block;
+            }
+            nav.main-nav ul {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            nav.main-nav ul li a {
+                padding: 8px 10px;
+                border-radius: 8px;
+                background: rgba(17, 24, 39, 0.65);
+            }
+        }
+
+        @media (max-width: 850px) {
+            .cart-layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body data-role="page" data-theme="b" data-enhance="false" style="background-color: #070913 !important;">
+    <!-- MODAL FLOTANTE DE ÉXITO PARA CARRITO -->
+    <div id="modalExitoCarrito">
+        <div class="modal-content-box">
+            <h2>🎉 ¡Compra Realizada con Éxito!</h2>
+            <p>Tu orden múltiple ha sido procesada y tu ubicación GPS ha sido registrada de forma segura.</p>
+
+            <div class="modal-ticket" id="modalTicketCarritoDetalle">
+                <!-- Se llena dinámicamente -->
+            </div>
+
+            <button type="button" class="btn-modal-regresar" onclick="limpiarYCerrarCarrito()">Regresar al Catálogo</button>
+        </div>
+    </div>
+
+    <header id="mainHeader">
+        <div class="nav-container">
+            <div class="nav-top-bar">
+                <div class="logo" onclick="window.location.href='{{ url_for('index') }}'">
+                    <img src="{{ url_for('static', filename='img/logo_upvm.png') }}" alt="Logo Sneakers UPVM" class="logo-nav-img">
+                    <span>Sneakers <span>UPVM</span></span>
+                </div>
+
+                <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="main-nav" id="mainNav">
+                <ul>
+                    <li><a href="{{ url_for('productos') }}" style="color: #00f3ff; font-weight: 700;"><i class="fas fa-shoe-prints"></i> Catálogo</a></li>
+                    <li><a href="{{ url_for('ubicacion_modulo') }}" style="color: #00f3ff; font-weight: 700;"><i class="fas fa-map-marker-alt"></i> Ubicación</a></li>
+                    <li><a href="{{ url_for('encuesta_modulo') }}" style="color: #00f3ff; font-weight: 700;"><i class="fas fa-poll"></i> Encuesta</a></li>
+                    <li><a href="{{ url_for('chat_modulo') }}" style="color: #00f3ff; font-weight: 700;"><i class="fas fa-comments"></i> Chat</a></li>
+                    <li><a href="{{ url_for('video_modulo') }}" style="color: #00f3ff; font-weight: 700;"><i class="fas fa-camera-retro"></i> Fotos</a></li>
+                    <!-- Enlace al Carrito -->
+                    <li><a href="{{ url_for('carrito_modulo') }}" style="color: #00f3ff; font-weight: 700;"><i class="fas fa-shopping-cart"></i> Carrito <span class="cart-nav-badge" id="cartCount">0</span></a></li>
+                    <li><a href="{{ url_for('logout') }}" style="color: #f87171;"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="cart-container" id="cartMainContainer">
+        <div class="cart-header">
+            <h1><i class="fas fa-shopping-bag"></i> Tu Carrito de Compras</h1>
+        </div>
+
+        <div class="cart-layout" id="cartLayout">
+            <!-- Dinámico -->
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 <span>Sneakers UPVM</span>. Todos los derechos reservados.</p>
+        <p style="font-size: 0.8rem; color: #6b7280; margin-top: 3px;">Desarrollado para Ingeniería en Tecnologías de la Información e Innovación Digital.</p>
+    </footer>
+
+    <script>
+        function actualizarContadorCarrito() {
+            let carrito = JSON.parse(localStorage.getItem('sneakers_carrito')) || [];
+            let totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+            $('#cartCount').text(totalItems);
+        }
+
+        function renderCarrito() {
+            let carrito = JSON.parse(localStorage.getItem('sneakers_carrito')) || [];
+            let container = $('#cartLayout');
+
+            if (carrito.length === 0) {
+                container.html(`
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h2>Tu carrito está vacío</h2>
+                        <p>Explora nuestro catálogo y selecciona tus modelos favoritos de Sneakers UPVM.</p>
+                        <a href="{{ url_for('productos') }}" class="btn-checkout" style="max-width: 250px; margin: auto;">Ver Catálogo</a>
+                    </div>
+                `);
+                return;
+            }
+
+            let htmlItems = '<div class="cart-items-list">';
+            let subtotal = 0;
+
+            carrito.forEach((item, index) => {
+                let itemTotal = item.precio * item.cantidad;
+                subtotal += itemTotal;
+                let imgSrc = '';
+                if (item.imagen) {
+                    if (item.imagen.startsWith('http://') || item.imagen.startsWith('https://')) {
+                        imgSrc = item.imagen; // Si es una URL externa
+                    } else {
+                        imgSrc = `/static/imagenes/${item.imagen}`; // Si es local
+                    }
+                } else {
+                    imgSrc = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=300&q=80';
+                }
+                htmlItems += `
+                    <div class="cart-item-card">
+                        <img src="${imgSrc}" alt="${item.nombre}" class="cart-item-img">
+                        <div class="cart-item-details">
+                            <h3>${item.nombre}</h3>
+                            <p>Talla: <strong>${item.talla}</strong></p>
+                            <span class="cart-item-price">$${item.precio.toFixed(2)} MXN</span>
+                        </div>
+                        <div class="cart-item-actions">
+                            <span class="qty-badge">Cant: ${item.cantidad}</span>
+                            <button class="btn-remove" onclick="eliminarItem(${index})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            htmlItems += '</div>';
+
+            let envio = 120.00;
+            let total = subtotal + envio;
+
+            let summaryHtml = `
+                <div class="cart-summary-box">
+                    <h3>Resumen de Pedido</h3>
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>$${subtotal.toFixed(2)} MXN</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío Seguro (UPVM)</span>
+                        <span>$${envio.toFixed(2)} MXN</span>
+                    </div>
+                    <div class="summary-total">
+                        <span>Total</span>
+                        <span>$${total.toFixed(2)} MXN</span>
+                    </div>
+                    <button class="btn-checkout" onclick="autorizarGpsYComprarCarrito()">
+                        <i class="fas fa-lock"></i> Autorizar GPS y Comprar
+                    </button>
+                    <a href="{{ url_for('productos') }}" class="btn-keep-shopping">
+                        Seguir viendo catálogo
+                    </a>
+                    <div id="mensaje-gps-carrito"></div>
+                </div>
+            `;
+
+            container.html(htmlItems + summaryHtml);
+        }
+
+        function eliminarItem(index) {
+            let carrito = JSON.parse(localStorage.getItem('sneakers_carrito')) || [];
+            carrito.splice(index, 1);
+            localStorage.setItem('sneakers_carrito', JSON.stringify(carrito));
+            renderCarrito();
+            actualizarContadorCarrito();
+        }
+
+        function autorizarGpsYComprarCarrito() {
+            const mensaje = document.getElementById('mensaje-gps-carrito');
+            let carrito = JSON.parse(localStorage.getItem('sneakers_carrito')) || [];
+
+            if (carrito.length === 0) {
+                alert("Tu carrito está vacío.");
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                alert('Tu navegador no soporta geolocalización.');
+                return;
+            }
+
+            mensaje.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Solicitando permiso de ubicación GPS...";
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    mensaje.innerHTML = "✅ Ubicación verificada. Guardando compra...";
+
+                    const latitud = position.coords.latitude;
+                    const longitud = position.coords.longitude;
+
+                    fetch('/api/comprar-carrito', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            items: carrito,
+                            latitud: latitud,
+                            longitud: longitud
+                        })
+                    })
+                    .then(async response => {
+                        const data = await response.json();
+                        if (!response.ok || !data.ok) {
+                            throw new Error(data.error || 'No se pudo registrar la compra');
+                        }
+                        return data;
+                    })
+                    .then(() => {
+                        mensaje.innerHTML = "";
+
+                        let ticketHtml = "<p><strong>Productos adquiridos:</strong></p>";
+                        let totalPares = 0;
+                        carrito.forEach(item => {
+                            ticketHtml += `<p>• <span>${item.nombre}</span> (${item.talla}) - <span>Cant: ${item.cantidad}</span></p>`;
+                            totalPares += item.cantidad;
+                        });
+                        ticketHtml += `<p style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;"><strong>Total de pares:</strong> <span>${totalPares}</span></p>`;
+
+                        document.getElementById('modalTicketCarritoDetalle').innerHTML = ticketHtml;
+
+                        document.getElementById('cartMainContainer').classList.add('blur-background');
+                        document.getElementById('mainHeader').classList.add('blur-background');
+                        document.getElementById('modalExitoCarrito').style.display = 'flex';
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert("⚠️ Error al guardar la compra: " + err.message);
+                        mensaje.innerHTML = "<span style='color: #f87171;'>Error al procesar la compra.</span>";
+                    });
+                },
+                function (error) {
+                    console.error(error);
+                    alert("⚠️ Debes permitir el acceso a tu ubicación GPS para completar la compra.");
+                    mensaje.innerHTML = "<span style='color: #f87171;'>Permiso GPS denegado. Intenta nuevamente.</span>";
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function limpiarYCerrarCarrito() {
+            localStorage.removeItem('sneakers_carrito');
+            window.location.href = "{{ url_for('productos') }}";
+        }
+
+        $(document).ready(function() {
+            renderCarrito();
+            actualizarContadorCarrito();
+
+            $('#menuToggle').on('click', function() {
+                const abierto = $('#mainNav').toggleClass('active').hasClass('active');
+                $(this).attr('aria-expanded', abierto);
+                $(this).find('i').toggleClass('fa-bars', !abierto).toggleClass('fa-times', abierto);
+            });
+
+            $('#mainNav a').on('click', function() {
+                $('#mainNav').removeClass('active');
+                $('#menuToggle').attr('aria-expanded', 'false');
+                $('#menuToggle i').removeClass('fa-times').addClass('fa-bars');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Administrador | Sneakers UPVM</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+    <link id="dynamic-favicon" rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_upvm.png') }}">
+<script>
+(function () {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "{{ url_for('static', filename='img/logo_upvm.png') }}";
+    img.onload = function () {
+        const size = 128;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+        ctx.restore();
+
+        const link = document.getElementById("dynamic-favicon");
+        if (link) {
+            link.href = canvas.toDataURL("image/png");
+        }
+    };
+})();
+</script>
+
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script>
+        $(document).on("mobileinit", function () {
+            $.mobile.ajaxEnabled = false;
+            $.mobile.linkBindingEnabled = false;
+            $.mobile.hashListeningEnabled = false;
+            $.mobile.pushStateEnabled = false;
+            $.mobile.ignoreContentEnabled = true;
+        });
+    </script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+
+        body, input, button, select, textarea, table, th, td, div, p, h1, h2, h3, a, span, li {
+            font-family: 'Outfit', sans-serif !important;
+        }
+        i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands {
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+        }
+        .far, .fa-regular {
+            font-weight: 400 !important;
+        }
+
+        html, body,
+        .ui-mobile-viewport,
+        .ui-overlay-a,
+        .ui-overlay-b,
+        .ui-page,
+        .ui-page-theme-a,
+        .ui-page-theme-b,
+        .ui-content {
+            background-color: #070913 !important;
+            background-image: none !important;
+            color: #f3f4f6 !important;
+            text-shadow: none !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            height: auto !important;
+            min-height: 100vh !important;
+            margin: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        body {
+            padding-top: 110px !important;
+            padding-bottom: 50px !important;
+        }
+
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: rgba(7, 9, 19, 0.94); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.15);
+        }
+        .nav-container {
+            max-width: 1400px; margin: auto; padding: 16px 40px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+        }
+        .nav-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #fff;
+            cursor: pointer;
+        }
+        .logo span { color: #00f3ff; }
+        .logo-nav-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.45);
+            background: #070913;
+            flex-shrink: 0;
+        }
+
+        /* Botón menú hamburguesa */
+        .menu-toggle {
+            display: none;
+            background: rgba(17, 24, 39, 0.9) !important;
+            border: 1px solid rgba(0, 243, 255, 0.4) !important;
+            color: #00f3ff !important;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: 0.25s;
+            padding: 0 !important;
+        }
+        .menu-toggle:hover {
+            background: #00f3ff !important;
+            color: #070913 !important;
+        }
+
+        nav ul { display: flex; align-items: center; gap: 20px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+        nav ul li a { color: #f3f4f6 !important; text-decoration: none !important; font-weight: 500; font-size: 0.95rem; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        nav ul li a:hover { color: #00f3ff !important; }
+
+        /* Badge del Carrito en el Menú */
+        .cart-nav-badge {
+            background: #ff007f; color: #fff; font-size: 0.75rem; font-weight: 700;
+            padding: 2px 7px; border-radius: 50px; margin-left: 4px; box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+
+        .container {
+            width: calc(100% - 40px) !important;
+            max-width: 1000px !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            background: rgba(17, 24, 39, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.12);
+            text-align: center;
+        }
+
+        .profile-photo-circle {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+            margin: 0 auto 12px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00f3ff;
+            font-size: 1.5rem;
+            background: #070913;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00f3ff, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        p.subtitle { color: #9ca3af; font-size: 0.9rem; margin-bottom: 25px; }
+
+        .menu-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 18px !important;
+            width: 100% !important;
+            max-width: 920px !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+
+        .menu-card {
+            background: rgba(31, 41, 55, 0.55);
+            border: 1px solid rgba(0, 243, 255, 0.22);
+            border-radius: 16px;
+            padding: 20px 18px;
+            text-decoration: none !important;
+            color: #f3f4f6 !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .menu-card:hover {
+            border-color: #00f3ff;
+            box-shadow: 0 8px 20px rgba(0, 243, 255, 0.2);
+            transform: translateY(-4px);
+            background: rgba(0, 243, 255, 0.06);
+        }
+        .menu-card .icon {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            color: #00f3ff;
+            background: rgba(0, 243, 255, 0.1);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+        }
+        .menu-card h3 { color: #00f3ff; margin: 0 0 6px 0; font-size: 1rem; font-weight: 700; }
+        .menu-card p { color: #9ca3af; font-size: 0.78rem; margin: 0; line-height: 1.35; }
+
+        @media (max-width: 900px) {
+            body { padding-top: 90px !important; }
+            .nav-container { padding: 14px 20px; }
+            .nav-top-bar { width: 100%; }
+            .menu-toggle { display: inline-flex; }
+            nav.main-nav {
+                display: none;
+                width: 100%;
+                padding-top: 12px;
+                border-top: 1px solid rgba(0, 243, 255, 0.15);
+            }
+            nav.main-nav.active {
+                display: block;
+            }
+            nav.main-nav ul {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            nav.main-nav ul li a {
+                padding: 8px 10px;
+                border-radius: 8px;
+                background: rgba(17, 24, 39, 0.65);
+            }
+        }
+
+        @media (max-width: 850px) {
+            .menu-grid { grid-template-columns: 1fr !important; max-width: 380px !important; }
+            .container { padding: 25px 18px; }
+        }
+    </style>
+</head>
+<body data-role="page" data-theme="b" data-enhance="false" style="background-color: #070913 !important;">
+    <header class="main-header">
+        <div class="nav-container">
+            <div class="nav-top-bar">
+                <div class="logo" onclick="window.location.href='{{ url_for('index') }}'">
+                    <img src="{{ url_for('static', filename='img/logo_upvm.png') }}" alt="Logo Sneakers UPVM" class="logo-nav-img">
+                    <span>Sneakers <span>UPVM</span></span>
+                </div>
+
+                <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="main-nav" id="mainNav">
+                <ul>
+                    <li><a href="{{ url_for('productos') }}"><i class="fas fa-shoe-prints"></i> Catálogo</a></li>
+                    <li><a href="{{ url_for('ubicacion_modulo') }}"><i class="fas fa-map-marker-alt"></i> Ubicación</a></li>
+                    <li><a href="{{ url_for('encuesta_modulo') }}"><i class="fas fa-poll"></i> Encuesta</a></li>
+                    <li><a href="{{ url_for('chat_modulo') }}"><i class="fas fa-comments"></i> Chat</a></li>
+                    <li><a href="{{ url_for('video_modulo') }}"><i class="fas fa-camera-retro"></i> Fotos</a></li>
+                    <li><a href="{{ url_for('carrito_modulo') }}" style="color: #00f3ff !important; font-weight: 700;"><i class="fas fa-shopping-cart"></i> Carrito <span class="cart-nav-badge" id="cartCount">0</span></a></li>
+
+                    <li><a href="{{ url_for('admin_menu') }}" style="color: #4ade80 !important; font-weight: 700;"><i class="fas fa-tools"></i> Panel Admin</a></li>
+                    <li><a href="{{ url_for('dashboard') }}" style="color: #c084fc !important; font-weight: 700;"><i class="fas fa-chart-line"></i> Métricas</a></li>
+
+                    <li><a href="{{ url_for('logout') }}" style="color: #f87171 !important;"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container" data-role="content">
+        <div class="profile-photo-circle">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <h1>Panel de Control - Administrador</h1>
+        <p class="subtitle">Bienvenido, <strong>{{ nombre }}</strong>. Selecciona el módulo de gestión:</p>
+
+        <div class="menu-grid">
+            <a href="{{ url_for('admin_productos') }}" class="menu-card">
+                <div class="icon"><i class="fas fa-boxes"></i></div>
+                <h3>Panel de Productos</h3>
+                <p>Gestión completa de inventario, inserción de nuevos tenis, control de stock y precios.</p>
+            </a>
+
+            <a href="{{ url_for('video_modulo') }}" class="menu-card">
+                <div class="icon"><i class="fas fa-camera-retro"></i></div>
+                <h3>Galería de Fotos y Reseñas</h3>
+                <p>Visualiza las fotos compartidas por la comunidad y elimina publicaciones si es necesario.</p>
+            </a>
+
+            <a href="{{ url_for('admin_compras') }}" class="menu-card">
+                <div class="icon"><i class="fas fa-shopping-bag"></i></div>
+                <h3>Historial de Compras</h3>
+                <p>Monitoreo detallado de órdenes, transacciones y compras realizadas por los clientes.</p>
+            </a>
+
+            <a href="{{ url_for('admin_ubicaciones') }}" class="menu-card">
+                <div class="icon"><i class="fas fa-map-marker-alt"></i></div>
+                <h3>Usuarios y Ubicación</h3>
+                <p>Coordenadas GPS de entrega y registros de ubicación en el campus de la UPVM.</p>
+            </a>
+
+            <a href="{{ url_for('admin_chat') }}" class="menu-card">
+                <div class="icon"><i class="fas fa-comments"></i></div>
+                <h3>Chat Comunitario</h3>
+                <p>Revisión en tiempo real y moderación de los mensajes de soporte con los estudiantes.</p>
+            </a>
+
+            <a href="{{ url_for('admin_encuestas') }}" class="menu-card">
+                <div class="icon"><i class="fas fa-poll-h"></i></div>
+                <h3>Encuestas de Clientes</h3>
+                <p>Revisa el cliente, sus respuestas de satisfacción y la fecha y hora en que las envió.</p>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function actualizarContadorCarrito() {
+            let carrito = JSON.parse(localStorage.getItem('sneakers_carrito')) || [];
+            let totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+            $('#cartCount').text(totalItems);
+        }
+
+        $(document).ready(function() {
+            actualizarContadorCarrito();
+
+            $('#menuToggle').on('click', function() {
+                const abierto = $('#mainNav').toggleClass('active').hasClass('active');
+                $(this).attr('aria-expanded', abierto);
+                $(this).find('i').toggleClass('fa-bars', !abierto).toggleClass('fa-times', abierto);
+            });
+
+            $('#mainNav a').on('click', function() {
+                $('#mainNav').removeClass('active');
+                $('#menuToggle').attr('aria-expanded', 'false');
+                $('#menuToggle i').removeClass('fa-times').addClass('fa-bars');
+            });
+        });
+    </script>
+</body>
+</html>

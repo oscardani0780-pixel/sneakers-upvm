@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captura de Foto UPVM | Sneakers UPVM</title>
+    
+    <!-- Fuentes e Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link id="dynamic-favicon" rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_upvm.png') }}">
+<script>
+(function () {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "{{ url_for('static', filename='img/logo_upvm.png') }}";
+    img.onload = function () {
+        const size = 128;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+        ctx.restore();
+
+        const link = document.getElementById("dynamic-favicon");
+        if (link) {
+            link.href = canvas.toDataURL("image/png");
+        }
+    };
+})();
+</script>
+    <!-- jQuery Mobile CSS -->
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+
+    <!-- jQuery 1.11.1 (compatible con jQuery Mobile 1.4.5) -->
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+    <!-- Configuración para no romper enlaces Flask ni el diseño oscuro -->
+    <script>
+        $(document).on("mobileinit", function () {
+            $.mobile.ajaxEnabled = false;
+            $.mobile.linkBindingEnabled = false;
+            $.mobile.hashListeningEnabled = false;
+            $.mobile.pushStateEnabled = false;
+            $.mobile.ignoreContentEnabled = true;
+        });
+    </script>
+
+    <!-- jQuery Mobile JS -->
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+
+        html, body,
+        .ui-mobile-viewport,
+        .ui-overlay-a,
+        .ui-overlay-b,
+        .ui-page,
+        .ui-page-theme-a,
+        .ui-page-theme-b,
+        .ui-content {
+            background-color: #070913 !important;
+            background-image: none !important;
+            color: #f3f4f6 !important;
+            margin: 0;
+            overflow-x: hidden;
+            text-shadow: none !important;
+        }
+
+        body {
+            padding-top: 100px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        /* Barra de navegación superior fija y responsiva */
+        header.main-header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: rgba(7, 9, 19, 0.92); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.15);
+        }
+        .nav-container {
+            max-width: 1400px; margin: auto; padding: 18px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 15px;
+        }
+        .nav-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #fff;
+            cursor: pointer;
+        }
+        .logo span { color: #00f3ff; }
+        .logo-nav-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.45);
+            background: #070913;
+            flex-shrink: 0;
+        }
+
+        /* Botón menú hamburguesa */
+        .menu-toggle {
+            display: none;
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            color: #00f3ff;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: 0.25s;
+        }
+        .menu-toggle:hover {
+            background: #00f3ff;
+            color: #070913;
+        }
+
+        nav.main-nav ul { display: flex; align-items: center; gap: 20px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+        nav.main-nav ul li a { color: #f3f4f6; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        nav.main-nav ul li a:hover { color: #00f3ff; }
+
+        .cart-nav-badge {
+            background: #ff007f; color: #fff; font-size: 0.75rem; font-weight: 700;
+            padding: 2px 7px; border-radius: 50px; margin-left: 4px; box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+
+        .page-container { max-width: 1100px; margin: 30px auto; padding: 0 20px; width: 100%; }
+        
+        .top-title-bar {
+            text-align: center; color: #00f3ff; font-weight: 700; font-size: 1.1rem;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.3); padding-bottom: 15px; margin-bottom: 25px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .btn-volver {
+            display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px;
+            background: rgba(17, 24, 39, 0.85); border: 1px solid rgba(0, 243, 255, 0.4);
+            color: #ff007f; padding: 8px 16px; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.3s;
+        }
+        .btn-volver:hover { background: rgba(255, 0, 127, 0.1); box-shadow: 0 0 15px rgba(255, 0, 127, 0.3); }
+
+        .upload-card {
+            background: rgba(17, 24, 39, 0.9); border: 1px solid #ff007f;
+            border-radius: 20px; padding: 35px; margin-bottom: 50px;
+            box-shadow: 0 0 35px rgba(255, 0, 127, 0.2); max-width: 700px; margin-left: auto; margin-right: auto;
+            text-align: center;
+        }
+        .upload-card h2 { font-size: 1.8rem; color: #00f3ff; margin: 0 0 5px 0; }
+        .user-tag { color: #ff007f; font-size: 0.95rem; margin-bottom: 25px; font-weight: 600; }
+
+        .camera-box-preview {
+            width: 100%; max-width: 500px; height: 320px; background: #000;
+            border: 2px solid #00f3ff; border-radius: 14px; margin: 0 auto 20px auto;
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4); position: relative;
+        }
+        video, canvas, #fotoVistaPrevia {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        .media-actions-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto 12px auto;
+        }
+
+        .btn-neon-azul {
+            background: linear-gradient(135deg, #00f3ff, #0284c7); color: #070913;
+            border: none; padding: 13px 18px; border-radius: 12px; font-weight: 700;
+            cursor: pointer; width: 100%; font-size: 0.98rem;
+            transition: 0.3s; box-shadow: 0 0 18px rgba(0, 243, 255, 0.35);
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-neon-azul:hover { transform: translateY(-2px); box-shadow: 0 0 28px rgba(0, 243, 255, 0.75); }
+
+        .btn-archivo-morado {
+            background: linear-gradient(135deg, #a855f7, #7e22ce); color: #ffffff;
+            border: none; padding: 13px 18px; border-radius: 12px; font-weight: 700;
+            cursor: pointer; width: 100%; font-size: 0.98rem;
+            transition: 0.3s; box-shadow: 0 0 18px rgba(168, 85, 247, 0.35);
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-archivo-morado:hover { transform: translateY(-2px); box-shadow: 0 0 28px rgba(168, 85, 247, 0.75); }
+
+        .btn-full-width {
+            max-width: 500px;
+            margin: 0 auto 12px auto;
+            display: flex;
+        }
+
+        .form-inputs-group { text-align: left; max-width: 500px; margin: 20px auto 0 auto; display: flex; flex-direction: column; gap: 14px; }
+        .product-talla-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 12px;
+        }
+        label { color: #cbd5e1; font-size: 0.9rem; font-weight: 600; display: block; margin-bottom: 6px; }
+        select, input[type="text"], textarea {
+            background: rgba(11, 15, 25, 0.9); border: 1px solid #374151; border-radius: 10px;
+            padding: 12px; color: #fff; font-size: 0.95rem; width: 100%;
+        }
+        input[readonly] {
+            background: rgba(17, 24, 39, 0.95);
+            border-color: rgba(0, 243, 255, 0.35);
+            color: #00f3ff;
+            font-weight: 700;
+            cursor: not-allowed;
+        }
+        select:focus, input:focus, textarea:focus { border-color: #00f3ff; outline: none; box-shadow: 0 0 10px rgba(0, 243, 255, 0.25); }
+
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+        .post-card {
+            background: rgba(17, 24, 39, 0.85); border: 1px solid rgba(0, 243, 255, 0.25);
+            border-radius: 18px; overflow: hidden; display: flex; flex-direction: column;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4); transition: 0.3s;
+        }
+        .post-card:hover { transform: translateY(-5px); border-color: #00f3ff; box-shadow: 0 12px 30px rgba(0, 243, 255, 0.2); }
+        .post-img-container { width: 100%; height: 240px; background: #0b0f19; overflow: hidden; }
+        .post-img-container img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }
+        
+        .post-body { padding: 20px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
+        .post-user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.85rem; color: #9ca3af; gap: 8px; flex-wrap: wrap; }
+        .post-user-info strong { color: #00f3ff; font-size: 0.95rem; }
+        .post-modelo { background: rgba(0, 243, 255, 0.12); color: #00f3ff; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .post-comment { color: #e2e8f0; font-size: 0.95rem; line-height: 1.5; margin: 0; }
+
+        .post-footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 10px;
+        }
+        .btn-borrar-post {
+            background: rgba(248, 113, 113, 0.15);
+            border: 1px solid rgba(248, 113, 113, 0.45);
+            color: #f87171;
+            padding: 5px 11px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.25s;
+        }
+        .btn-borrar-post:hover {
+            background: #ef4444;
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+        }
+
+        /* Modal estilo éxito de compra con fondo borroso */
+        .modal-blur-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 9, 19, 0.68);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 20px;
+        }
+        .modal-blur-backdrop.active {
+            display: flex;
+        }
+        .modal-confirm-card {
+            width: 100%;
+            max-width: 440px;
+            background: rgba(17, 24, 39, 0.94);
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            border-radius: 22px;
+            padding: 32px 28px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.22);
+            animation: modalPop 0.22s ease-out;
+        }
+        @keyframes modalPop {
+            from { transform: scale(0.94); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-icon-warning {
+            width: 62px;
+            height: 62px;
+            margin: 0 auto 16px auto;
+            border-radius: 50%;
+            background: rgba(248, 113, 113, 0.14);
+            border: 1px solid rgba(248, 113, 113, 0.45);
+            color: #f87171;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+        }
+        .modal-confirm-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.4rem;
+            color: #ffffff;
+        }
+        .modal-confirm-card p {
+            margin: 0 0 24px 0;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .modal-buttons-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .btn-modal-cancelar {
+            flex: 1;
+            background: rgba(55, 65, 81, 0.65);
+            border: 1px solid rgba(156, 163, 175, 0.35);
+            color: #e5e7eb;
+            padding: 11px 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+        .btn-modal-cancelar:hover {
+            background: rgba(75, 85, 99, 0.85);
+            color: #ffffff;
+        }
+        .btn-modal-eliminar {
+            flex: 1;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: none;
+            color: #ffffff;
+            padding: 11px 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            cursor: pointer;
+            box-shadow: 0 0 18px rgba(239, 68, 68, 0.4);
+            transition: 0.25s;
+        }
+        .btn-modal-eliminar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
+        }
+
+        footer { border-top: 1px solid rgba(0, 243, 255, 0.15); background: rgba(7, 9, 19, 0.95); padding: 25px 20px; text-align: center; color: #9ca3af; font-size: 0.9rem; margin-top: 50px; }
+        footer span { color: #00f3ff; font-weight: 600; }
+
+        @media (max-width: 900px) {
+            body { padding-top: 85px; }
+            .nav-container { padding: 14px 20px; }
+            .nav-top-bar { width: 100%; }
+            .menu-toggle { display: inline-flex; }
+            nav.main-nav {
+                display: none;
+                width: 100%;
+                padding-top: 12px;
+                border-top: 1px solid rgba(0, 243, 255, 0.15);
+            }
+            nav.main-nav.active {
+                display: block;
+            }
+            nav.main-nav ul {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            nav.main-nav ul li a {
+                padding: 8px 10px;
+                border-radius: 8px;
+                background: rgba(17, 24, 39, 0.65);
+            }
+        }
+
+        @media (max-width: 560px) {
+            .media-actions-row, .product-talla-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body data-role="page" data-theme="b" data-enhance="false" style="background-color: #070913 !important;">
+    <header class="main-header">
+        <div class="nav-container">
+            <div class="nav-top-bar">
+                <div class="logo" onclick="window.location.href='{{ url_for('index') }}'">
+                    <img src="{{ url_for('static', filename='img/logo_upvm.png') }}" alt="Logo Sneakers UPVM" class="logo-nav-img">
+                    <span>Sneakers <span>UPVM</span></span>
+                </div>
+
+                <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="main-nav" id="mainNav">
+                <ul>
+                    <li><a href="{{ url_for('productos') }}"><i class="fas fa-shoe-prints"></i> Catálogo</a></li>
+                    <li><a href="{{ url_for('ubicacion_modulo') }}"><i class="fas fa-map-marker-alt"></i> Ubicación</a></li>
+                    <li><a href="{{ url_for('encuesta_modulo') }}"><i class="fas fa-poll"></i> Encuesta</a></li>
+                    <li><a href="{{ url_for('chat_modulo') }}"><i class="fas fa-comments"></i> Chat</a></li>
+                    <li><a href="{{ url_for('video_modulo') }}" style="color: #00f3ff; font-weight: 700;"><i class="fas fa-camera-retro"></i> Fotos</a></li>
+                    <li><a href="{{ url_for('carrito_modulo') }}"><i class="fas fa-shopping-cart"></i> Carrito <span class="cart-nav-badge" id="cartCount">0</span></a></li>
+                    
+                    {% if rol == 'admin' %}
+                        <li><a href="{{ url_for('admin_menu') }}" style="color: #4ade80; font-weight: 700;"><i class="fas fa-tools"></i> Panel Admin</a></li>
+                        <li><a href="{{ url_for('dashboard') }}" style="color: #c084fc; font-weight: 700;"><i class="fas fa-chart-line"></i> Métricas</a></li>
+                    {% endif %}
+
+                    <li><a href="{{ url_for('logout') }}" style="color: #f87171;"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-container">
+        <div class="top-title-bar">Captura de Foto UPVM</div>
+
+        <div class="upload-card">
+            <a href="{{ url_for('index') }}" class="btn-volver"><i class="fas fa-arrow-left"></i> Volver al Menú Principal</a>
+            
+            <h2>Subir o Tomar Foto</h2>
+            <div class="user-tag">Usuario: <strong>{{ nombre_usuario }}</strong></div>
+
+            <form action="{{ url_for('video_modulo') }}" method="POST" id="formCaptura">
+                <!-- Visor de la cámara / vista previa de archivo -->
+                <div class="camera-box-preview">
+                    <video id="videoCamara" autoplay playsinline style="display:none;"></video>
+                    <canvas id="canvasCaptura" style="display:none;"></canvas>
+                    <img id="fotoVistaPrevia" alt="Vista previa de la captura" style="display:none;">
+                    <div id="camaraApagadaMsg" style="color: #9ca3af; font-size: 0.9rem;">Cámara inactiva. Activa la cámara o adjunta una foto desde tus archivos.</div>
+                </div>
+
+                <!-- Input oculto para adjuntar archivo desde el dispositivo -->
+                <input type="file" id="inputArchivoFoto" accept="image/*" style="display:none;">
+
+                <!-- Opciones: Activar Cámara y Adjuntar Archivo -->
+                <div class="media-actions-row" id="filaOpcionesIniciales">
+                    <button type="button" class="btn-neon-azul" id="btnActivarCamara">
+                        <i class="fas fa-video"></i> Activar Cámara
+                    </button>
+                    <button type="button" class="btn-archivo-morado" id="btnAdjuntarArchivo">
+                        <i class="fas fa-folder-open"></i> Adjuntar Archivo
+                    </button>
+                </div>
+
+                <button type="button" class="btn-neon-azul btn-full-width" id="btnTomarFoto" style="display:none;">
+                    <i class="fas fa-camera"></i> Tomar Foto
+                </button>
+                <button type="button" class="btn-neon-azul btn-full-width" id="btnRepetir" style="display:none; background: linear-gradient(135deg, #f43f5e, #be123c); color: #fff;">
+                    <i class="fas fa-redo"></i> Cambiar / Repetir Foto
+                </button>
+
+                <!-- Selección automática de producto y talla + reseña -->
+                <div class="form-inputs-group">
+                    <div class="product-talla-grid">
+                        <div>
+                            <label for="modelo">Producto / Modelo de Sneakers:</label>
+                            <select id="modelo" name="modelo" required>
+                                <option value="" data-talla="">-- Selecciona un producto --</option>
+                                {% for prod in productos %}
+                                    <option value="{{ prod.nombre }}" data-talla="{{ prod.talla }}">{{ prod.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="tallaAuto">Talla (Automática):</label>
+                            <input type="text" id="tallaAuto" name="talla" placeholder="--" readonly required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="comentario">Comentario o Reseña:</label>
+                        <textarea id="comentario" name="comentario" rows="3" placeholder="Excelente calidad, entrega puntual..." required></textarea>
+                    </div>
+
+                    <input type="hidden" name="foto_base64" id="fotoBase64Input" required>
+
+                    <button type="submit" class="btn-neon-azul btn-full-width" style="background: linear-gradient(135deg, #4ade80, #16a34a); color: #070913; margin-top: 10px;">
+                        <i class="fas fa-paper-plane"></i> Publicar en la Comunidad
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Galería de fotos compartidas -->
+        <h2 style="font-size: 1.5rem; color: #fff; margin-bottom: 20px;"><i class="fas fa-images"></i> Galería de la Comunidad</h2>
+        
+        <div class="gallery-grid">
+            {% if publicaciones %}
+                {% for post in publicaciones %}
+                <div class="post-card">
+                    <div class="post-img-container">
+                        {% if post.imagen.startswith('data:image') %}
+                            <img src="{{ post.imagen }}" alt="Foto de entrega">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/' + post.imagen) }}" alt="Foto de entrega">
+                        {% endif %}
+                    </div>
+                    <div class="post-body">
+                        <div>
+                            <div class="post-user-info">
+                                <span>Por: <strong>{{ post.nombre_usuario }}</strong></span>
+                                <span class="post-modelo">{{ post.modelo }}</span>
+                            </div>
+                            <p class="post-comment">"{{ post.comentario }}"</p>
+                        </div>
+                        <div class="post-footer-row">
+                            <span><i class="far fa-clock"></i> {{ post.fecha }}</span>
+
+                            {% if rol == 'admin' %}
+                            <button type="button" class="btn-borrar-post" onclick="abrirModalEliminar('{{ url_for('eliminar_foto_comunidad', foto_id=post.id) }}', '{{ post.nombre_usuario }}')">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: #9ca3af; grid-column: 1 / -1; text-align: center; padding: 40px;">Aún no hay fotos publicadas. ¡Sé el primero en compartir la foto de tu compra!</p>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Modal de confirmación con fondo borroso -->
+    <div class="modal-blur-backdrop" id="modalEliminarPost" onclick="cerrarModalSiFondo(event)">
+        <div class="modal-confirm-card">
+            <div class="modal-icon-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3>Eliminar Publicación</h3>
+            <p id="textoModalEliminar">¿Deseas eliminar esta publicación por lenguaje ofensivo o inapropiado?</p>
+            <form id="formEliminarPost" method="POST" action="">
+                <div class="modal-buttons-row">
+                    <button type="button" class="btn-modal-cancelar" onclick="cerrarModalEliminar()">Cancelar</button>
+                    <button type="submit" class="btn-modal-eliminar">Eliminar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 <span>Sneakers UPVM</span>. Todos los derechos reservados.</p>
+        <p style="font-size: 0.8rem; color: #6b7280; margin-top: 3px;">Desarrollado para Ingeniería en Tecnologías de la Información e Innovación Digital.</p>
+    </footer>
+
+    <script>
+        function actualizarContadorCarrito() {
+            let carrito = JSON.parse(localStorage.getItem('sneakers_carrito')) || [];
+            let totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+            $('#cartCount').text(totalItems);
+        }
+
+        // Rellenar talla automáticamente al elegir producto de la lista
+        const selectModelo = document.getElementById('modelo');
+        const inputTallaAuto = document.getElementById('tallaAuto');
+
+        selectModelo.addEventListener('change', function() {
+            const opcionSeleccionada = this.options[this.selectedIndex];
+            const talla = opcionSeleccionada.getAttribute('data-talla') || '';
+            inputTallaAuto.value = talla;
+        });
+
+        const modalEliminar = document.getElementById('modalEliminarPost');
+        const formEliminar = document.getElementById('formEliminarPost');
+        const textoModal = document.getElementById('textoModalEliminar');
+
+        function abrirModalEliminar(urlEliminar, autor) {
+            formEliminar.action = urlEliminar;
+            textoModal.innerHTML = `¿Deseas eliminar la publicación de <strong>${autor}</strong> por lenguaje ofensivo o inapropiado?`;
+            modalEliminar.classList.add('active');
+        }
+
+        function cerrarModalEliminar() {
+            modalEliminar.classList.remove('active');
+            formEliminar.action = '';
+        }
+
+        function cerrarModalSiFondo(event) {
+            if (event.target === modalEliminar) {
+                cerrarModalEliminar();
+            }
+        }
+
+        const video = document.getElementById('videoCamara');
+        const canvas = document.getElementById('canvasCaptura');
+        const fotoVistaPrevia = document.getElementById('fotoVistaPrevia');
+        const msgInactivo = document.getElementById('camaraApagadaMsg');
+        
+        const filaOpcionesIniciales = document.getElementById('filaOpcionesIniciales');
+        const btnActivar = document.getElementById('btnActivarCamara');
+        const btnAdjuntarArchivo = document.getElementById('btnAdjuntarArchivo');
+        const inputArchivoFoto = document.getElementById('inputArchivoFoto');
+        const btnTomar = document.getElementById('btnTomarFoto');
+        const btnRepetir = document.getElementById('btnRepetir');
+        const fotoBase64Input = document.getElementById('fotoBase64Input');
+        const formCaptura = document.getElementById('formCaptura');
+        let streamCamara = null;
+
+        function detenerCamara() {
+            if (streamCamara) {
+                streamCamara.getTracks().forEach(track => track.stop());
+                streamCamara = null;
+            }
+        }
+
+        btnActivar.addEventListener('click', async function() {
+            try {
+                streamCamara = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: false });
+                video.srcObject = streamCamara;
+                video.style.display = 'block';
+                fotoVistaPrevia.style.display = 'none';
+                msgInactivo.style.display = 'none';
+                
+                filaOpcionesIniciales.style.display = 'none';
+                btnTomar.style.display = 'flex';
+            } catch (err) {
+                console.error("Error al acceder a la cámara: ", err);
+                alert("No se pudo acceder a la cámara. Puedes usar 'Adjuntar Archivo' o revisar los permisos del navegador.");
+            }
+        });
+
+        btnAdjuntarArchivo.addEventListener('click', function() {
+            inputArchivoFoto.click();
+        });
+
+        inputArchivoFoto.addEventListener('change', function(event) {
+            const archivo = event.target.files[0];
+            if (!archivo) return;
+
+            if (!archivo.type.startsWith('image/')) {
+                alert("Por favor selecciona un archivo de imagen válido.");
+                inputArchivoFoto.value = '';
+                return;
+            }
+
+            const lector = new FileReader();
+            lector.onload = function(e) {
+                const dataURL = e.target.result;
+                fotoBase64Input.value = dataURL;
+                fotoVistaPrevia.src = dataURL;
+                fotoVistaPrevia.style.display = 'block';
+                video.style.display = 'none';
+                msgInactivo.style.display = 'none';
+
+                filaOpcionesIniciales.style.display = 'none';
+                btnTomar.style.display = 'none';
+                btnRepetir.style.display = 'flex';
+                detenerCamara();
+            };
+            lector.readAsDataURL(archivo);
+        });
+
+        btnTomar.addEventListener('click', function() {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const dataURL = canvas.toDataURL('image/png');
+            fotoBase64Input.value = dataURL;
+            
+            fotoVistaPrevia.src = dataURL;
+            fotoVistaPrevia.style.display = 'block';
+            video.style.display = 'none';
+            
+            btnTomar.style.display = 'none';
+            btnRepetir.style.display = 'flex';
+
+            detenerCamara();
+        });
+
+        btnRepetir.addEventListener('click', function() {
+            fotoVistaPrevia.style.display = 'none';
+            fotoVistaPrevia.src = '';
+            fotoBase64Input.value = '';
+            inputArchivoFoto.value = '';
+            btnRepetir.style.display = 'none';
+            msgInactivo.style.display = 'block';
+            filaOpcionesIniciales.style.display = 'grid';
+        });
+
+        formCaptura.addEventListener('submit', function(e) {
+            if (!fotoBase64Input.value) {
+                e.preventDefault();
+                alert("Por favor toma una foto con la cámara o adjunta una imagen desde tus archivos antes de publicar.");
+            }
+        });
+
+        $(document).ready(function() {
+            window.scrollTo(0, 0);
+            actualizarContadorCarrito();
+
+            $('#menuToggle').on('click', function() {
+                const abierto = $('#mainNav').toggleClass('active').hasClass('active');
+                $(this).attr('aria-expanded', abierto);
+                $(this).find('i').toggleClass('fa-bars', !abierto).toggleClass('fa-times', abierto);
+            });
+
+            $('#mainNav a').on('click', function() {
+                $('#mainNav').removeClass('active');
+                $('#menuToggle').attr('aria-expanded', 'false');
+                $('#menuToggle i').removeClass('fa-times').addClass('fa-bars');
+            });
+        });
+    </script>
+</body>
+</html>
