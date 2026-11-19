@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sneakers UPVM | Inicio</title>
+
+    <!-- Favicon en la pestaña del navegador -->
+    <link id="dynamic-favicon" rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo_upvm.png') }}">
+    <script>
+    (function () {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = "{{ url_for('static', filename='img/logo_upvm.png') }}";
+        img.onload = function () {
+            const size = 128;
+            const canvas = document.createElement("canvas");
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext("2d");
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+
+            const side = Math.min(img.width, img.height);
+            const sx = (img.width - side) / 2;
+            const sy = (img.height - side) / 2;
+            ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+            ctx.restore();
+
+            const link = document.getElementById("dynamic-favicon");
+            if (link) {
+                link.href = canvas.toDataURL("image/png");
+            }
+        };
+    })();
+    </script>
+
+    <!-- Fuentes e Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- jQuery estándar -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Google Maps API Oficial -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY_DE_GOOGLE_MAPS&callback=initMap" async defer></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: #070913;
+            color: #f3f4f6;
+            margin: 0;
+            padding-top: 90px;
+            overflow-x: hidden;
+        }
+
+        /* Barra de navegación superior fija y responsiva */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: rgba(7, 9, 19, 0.92); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.15);
+        }
+        .nav-container {
+            max-width: 1400px; margin: auto; padding: 18px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 15px;
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #fff;
+            cursor: pointer;
+        }
+        .logo span { color: #00f3ff; }
+        .logo-nav-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.45);
+            background: #070913;
+            flex-shrink: 0;
+        }
+        nav ul { display: flex; align-items: center; gap: 20px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+        nav ul li a { color: #f3f4f6; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        nav ul li a:hover { color: #00f3ff; }
+
+        /* Badge del Carrito en el Menú */
+        .cart-nav-badge {
+            background: #ff007f; color: #fff; font-size: 0.75rem; font-weight: 700;
+            padding: 2px 7px; border-radius: 50px; margin-left: 4px; box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+
+        /* Notificación flotante Toast */
+        #toast-notification {
+            position: fixed; bottom: 30px; right: 30px; background: rgba(0, 243, 255, 0.95);
+            color: #070913; padding: 12px 24px; border-radius: 12px; font-weight: 700;
+            box-shadow: 0 5px 20px rgba(0, 243, 255, 0.4); z-index: 9999; display: none;
+            backdrop-filter: blur(10px); animation: fadeInOut 0.3s ease;
+        }
+
+        /* Eslogan superior y Nombre de Usuario grande */
+        .hero-slogan-header {
+            max-width: 1200px;
+            margin: 20px auto 30px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+        .user-welcome-large {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            background: linear-gradient(135deg, #00f3ff, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 25px rgba(0, 243, 255, 0.3);
+        }
+        .slogan-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: #ffffff;
+        }
+        .slogan-sub {
+            color: #9ca3af;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        /* Carrusel estilo Coppel responsivo */
+        .carousel-wrapper {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto 50px auto;
+            padding: 0 20px;
+        }
+        .carousel-viewport {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 26px;
+            border: 1px solid rgba(0, 243, 255, 0.35);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(17, 24, 39, 0.85) 50%, rgba(6, 78, 99, 0.4) 100%);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 0 45px rgba(0, 243, 255, 0.18);
+        }
+        .carousel-track {
+            display: flex;
+            transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+            width: 100%;
+        }
+        .carousel-slide {
+            min-width: 100%;
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            align-items: center;
+            padding: 45px 75px;
+            gap: 35px;
+            position: relative;
+        }
+        .promo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #ff007f, #9333ea);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.35);
+        }
+        .slide-info h2 {
+            font-size: 2.3rem;
+            margin: 0 0 12px 0;
+            color: #ffffff;
+            line-height: 1.15;
+        }
+        .slide-desc {
+            color: #cbd5e1;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0 0 18px 0;
+            max-width: 520px;
+        }
+        .slide-specs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #9ca3af;
+            flex-wrap: wrap;
+        }
+        .slide-specs span {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .slide-price-box { margin-bottom: 24px; }
+        .slide-price-label { display: block; font-size: 0.8rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; }
+        .slide-price { font-size: 2.6rem; font-weight: 800; color: #4ade80; text-shadow: 0 0 20px rgba(74, 222, 128, 0.3); }
+        .slide-actions { display: flex; gap: 15px; flex-wrap: wrap; }
+        .btn-slide-primary {
+            background: #00f3ff; color: #070913; padding: 13px 30px;
+            border-radius: 50px; font-weight: 700; font-size: 1rem;
+            text-decoration: none; transition: 0.3s; box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+            border: none; cursor: pointer; display: inline-block;
+        }
+        .btn-slide-primary:hover { transform: translateY(-3px); box-shadow: 0 0 30px rgba(0, 243, 255, 0.7); }
+        .btn-slide-secondary {
+            border: 1px solid rgba(0, 243, 255, 0.5); color: #00f3ff; padding: 13px 26px;
+            border-radius: 50px; font-weight: 600; font-size: 0.95rem; text-decoration: none; transition: 0.3s;
+            display: inline-block;
+        }
+        .btn-slide-secondary:hover { background: rgba(0, 243, 255, 0.1); }
+        .slide-image-container { position: relative; display: flex; justify-content: center; align-items: center; }
+        .slide-image-container::before {
+            content: ''; position: absolute; width: 260px; height: 260px;
+            background: radial-gradient(circle, rgba(0, 243, 255, 0.35) 0%, transparent 70%);
+            border-radius: 50%; z-index: 0;
+        }
+        .slide-image-container img {
+            position: relative; z-index: 1; width: 100%; max-width: 380px; height: 280px;
+            object-fit: cover; border-radius: 20px; border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); transition: transform 0.4s ease;
+        }
+        .carousel-slide:hover .slide-image-container img { transform: scale(1.04) rotate(-1.5deg); }
+
+        /* Botones de navegación del carrusel */
+        .carousel-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px;
+            border-radius: 50%; background: rgba(17, 24, 39, 0.9); color: #00f3ff; border: 1px solid rgba(0, 243, 255, 0.4);
+            font-size: 1.2rem; cursor: pointer; z-index: 10; display: flex; align-items: center;
+            justify-content: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); transition: 0.25s ease;
+        }
+        .carousel-arrow:hover { background: #00f3ff; color: #070913; transform: translateY(-50%) scale(1.1); box-shadow: 0 0 20px rgba(0, 243, 255, 0.6); }
+        .arrow-prev { left: 20px; }
+        .arrow-next { right: 20px; }
+        .carousel-dots { display: flex; justify-content: center; gap: 10px; margin-top: 18px; }
+        .dot { width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); border: none; cursor: pointer; transition: 0.3s; padding: 0; }
+        .dot.active { width: 28px; border-radius: 10px; background: #00f3ff; box-shadow: 0 0 10px rgba(0, 243, 255, 0.7); }
+
+        /* Sección Modelos Destacados */
+        .showcase-section { max-width: 1200px; margin: 50px auto; padding: 0 20px; }
+        .showcase-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; flex-wrap: wrap; gap: 10px; }
+        .showcase-header h2 { font-size: 1.6rem; color: #fff; margin: 0; }
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .sneaker-card {
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 18px; overflow: hidden; text-decoration: none; color: #f3f4f6;
+            display: flex; flex-direction: column; text-align: left;
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+        }
+        .sneaker-card:hover {
+            transform: translateY(-10px); border-color: #00f3ff; box-shadow: 0 15px 30px rgba(0, 243, 255, 0.25);
+        }
+        .card-img-top { width: 100%; height: 180px; object-fit: cover; background: #111827; }
+        .card-body { padding: 20px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
+        .card-body h3 { font-size: 1.1rem; color: #00f3ff; margin: 0 0 8px 0; }
+        .card-body p { color: #9ca3af; font-size: 0.85rem; margin: 0 0 15px 0; line-height: 1.4; }
+        .card-footer-info { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px; }
+        .card-price { font-size: 1.15rem; font-weight: 700; color: #4ade80; }
+        .btn-comprar-card { color: #00f3ff; font-size: 0.85rem; font-weight: 600; text-decoration: none; cursor: pointer; background: none; border: none; }
+
+        /* SECCIÓN DE ACCESOS RÁPIDOS */
+        .quick-services-section {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+        .quick-services-section h2 {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .quick-services-section h2 i { color: #00f3ff; }
+        .services-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+        .service-card-item {
+            background: rgba(17, 24, 39, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 243, 255, 0.25);
+            border-radius: 20px;
+            padding: 30px 25px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+            color: #f3f4f6;
+        }
+        .service-card-item:hover {
+            border-color: #00f3ff;
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 243, 255, 0.3);
+            background: rgba(0, 243, 255, 0.05);
+        }
+        .service-icon-circle {
+            width: 70px;
+            height: 70px;
+            background: rgba(0, 243, 255, 0.12);
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00f3ff;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+            transition: 0.3s;
+        }
+        .service-card-item:hover .service-icon-circle {
+            background: #00f3ff;
+            color: #070913;
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.6);
+        }
+        .service-card-item h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 10px 0;
+        }
+        .service-card-item p {
+            color: #9ca3af;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            margin: 0 0 20px 0;
+        }
+        .btn-service-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #00f3ff;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .service-card-item:hover .btn-service-action {
+            text-decoration: underline;
+            gap: 12px;
+        }
+
+        /* Apartado Ubicación & Mapa */
+        .location-section, .media-section {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+        .location-section h2, .media-section h2 {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .location-section h2 i, .media-section h2 i { color: #00f3ff; }
+
+        .location-container, .media-container {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 30px;
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.12);
+        }
+
+        .map-box-wrapper { display: flex; flex-direction: column; gap: 15px; }
+        #mini-map {
+            width: 100%;
+            height: 380px;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 243, 255, 0.25);
+            z-index: 1;
+        }
+        .coords-input-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .coords-input-group input {
+            flex: 1; min-width: 120px; background: rgba(7, 9, 19, 0.9);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            padding: 10px 14px; border-radius: 10px; color: #fff; font-size: 0.9rem;
+        }
+        .btn-update-map {
+            background: #00f3ff; color: #070913; border: none;
+            padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s;
+        }
+
+        .store-info-box, .store-desc-box {
+            display: flex; flex-direction: column; justify-content: center;
+            background: rgba(7, 9, 19, 0.6); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px; padding: 25px;
+        }
+        .store-info-box h3, .store-desc-box h3 { font-size: 1.4rem; color: #00f3ff; margin: 0 0 12px 0; }
+        .store-info-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 16px; }
+        .store-info-list li { display: flex; align-items: flex-start; gap: 12px; color: #d1d5db; font-size: 0.95rem; line-height: 1.5; }
+        .store-info-list li i { color: #00f3ff; font-size: 1.1rem; margin-top: 3px; }
+
+        .store-desc-box p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; margin: 0 0 15px 0; }
+        .store-features-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+        .store-features-list li { color: #9ca3af; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .store-features-list li i { color: #4ade80; }
+
+        .video-frame-container {
+            position: relative; width: 100%; height: 340px; border-radius: 16px;
+            overflow: hidden; border: 1px solid rgba(0, 243, 255, 0.3); background: #000;
+        }
+        .video-frame-container iframe { width: 100%; height: 100%; object-fit: cover; border: none; }
+
+        /* Footer Copyright */
+        footer {
+            border-top: 1px solid rgba(0, 243, 255, 0.15);
+            background: rgba(7, 9, 19, 0.95); padding: 30px 20px;
+            text-align: center; color: #9ca3af; font-size: 0.9rem;
+        }
+        footer p { margin: 0 0 5px 0; }
+        footer span { color: #00f3ff; font-weight: 600; }
+
+        @media (max-width: 950px) {
+            .carousel-slide { grid-template-columns: 1fr; padding: 35px 20px; text-align: center; }
+            .slide-desc { margin: 0 auto 18px auto; }
+            .slide-specs, .slide-actions { justify-content: center; }
+            .slide-image-container { order: -1; }
+            .arrow-prev { left: 10px; }
+            .arrow-next { right: 10px; }
+            .services-grid-3 { grid-template-columns: 1fr; }
+            .location-container, .media-container { grid-template-columns: 1fr; }
+            .nav-container { padding: 15px 20px; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Notificación Toast -->
+    <div id="toast-notification"><i class="fas fa-cart-plus"></i> ¡Producto agregado al carrito!</div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo" onclick="window.location.href='{{ url_for('index') }}'">
+                <img src="{{ url_for('static', filename='img/logo_upvm.png') }}" alt="Logo Sneakers UPVM" class="logo-nav-img">
+                <span>Sneakers <span>UPVM</span></span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('productos') }}"><i class="fas fa-shoe-prints"></i> Catálogo</a></li>
+                    <li><a href="{{ url_for('ubicacion_modulo') }}"><i class="fas fa-map-marker-alt"></i> Ubicación</a></li>
+                    <li><a href="{{ url_for('encuesta_modulo') }}"><i class="fas fa-poll"></i> Encuesta</a></li>
+                    <li><a href="{{ url_for('chat_modulo') }}"><i class="fas fa-comments"></i> Chat</a></li>
+                    <li><a href="{{ url_for('video_modulo') }}"><i class="fas fa-camera-retro"></i> Fotos</a></li>
+
+                    <!-- Enlace al Carrito -->
+                    <li><a href="{{ url_for('carrito_modulo') }}" style="color: #00f3ff; font-weight: 700;"><i class="fas fa-shopping-cart"></i> Carrito <span class="cart-nav-badge" id="cartCount">0</span></a></li>
+
+                    <!-- OPCIONES EXCLUSIVAS DEL ADMINISTRADOR EN LA PARTE SUPERIOR -->
+                    {% if rol == 'admin' %}
+                    <li><a href="{{ url_for('admin_menu') }}" style="color: #4ade80; font-weight: 700;"><i class="fas fa-tools"></i> Panel Admin</a></li>
+                    <li><a href="{{ url_for('dashboard') }}" style="color: #c084fc; font-weight: 700;"><i class="fas fa-chart-line"></i> Métricas</a></li>
+                    {% endif %}
+
+                    <li><a href="{{ url_for('logout') }}" style="color: #f87171;"><i class="fas fa-sign-out-alt"></i> Salir</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Eslogan y Nombre de Usuario grande -->
+        <section class="hero-slogan-header">
+            <h1 class="user-welcome-large">¡Bienvenido, {{ nombre }}!</h1>
+            <h2 class="slogan-title">Domina cada paso con estilo futurista</h2>
+            <p class="slogan-sub">Ediciones exclusivas, entrega geolocalizada y los mejores modelos de Sneakers UPVM.</p>
+        </section>
+
+        <!-- Carrusel de productos -->
+        <section class="carousel-wrapper" id="sneakerCarousel">
+            {% if productos %}
+                <button class="carousel-arrow arrow-prev" id="prevBtn" aria-label="Anterior">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="carousel-arrow arrow-next" id="nextBtn" aria-label="Siguiente">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+
+                <div class="carousel-viewport">
+                    <div class="carousel-track" id="carouselTrack">
+                        {% for p in productos %}
+                        <div class="carousel-slide">
+                            <div class="slide-info">
+                                <div class="promo-badge">
+                                    <i class="fas fa-bolt"></i> Destacado #{{ loop.index }}
+                                </div>
+                                <h2>{{ p.nombre }}</h2>
+                                <p class="slide-desc">{{ p.descripcion }}</p>
+
+                                <div class="slide-specs">
+                                    <span><i class="fas fa-ruler"></i> Talla: <strong>{{ p.talla }}</strong></span>
+                                    <span><i class="fas fa-box-open"></i> Stock: <strong>{{ p.stock }} disp.</strong></span>
+                                </div>
+
+                                <div class="slide-price-box">
+                                    <span class="slide-price-label">Precio especial</span>
+                                    <span class="slide-price">${{ p.precio }} MXN</span>
+                                </div>
+
+                                <div class="slide-actions">
+                                    <button type="button" class="btn-slide-primary add-to-cart-btn"
+                                        data-id="{{ p.id }}"
+                                        data-nombre="{{ p.nombre }}"
+                                        data-precio="{{ p.precio }}"
+                                        data-talla="{{ p.talla }}"
+                                        data-imagen="{{ p.imagen }}">
+                                        <i class="fas fa-cart-plus"></i> Agregar al Carrito
+                                    </button>
+                                    <a href="{{ url_for('productos') }}" class="btn-slide-secondary">
+                                        Ver Catálogo Completo
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="slide-image-container">
+                                {% if p.imagen %}
+                                    {% if p.imagen.startswith('http://') or p.imagen.startswith('https://') %}
+                                        <img src="{{ p.imagen }}" alt="{{ p.nombre }}">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='imagenes/' + p.imagen) }}" alt="{{ p.nombre }}">
+                                    {% endif %}
+                                {% else %}
+                                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=80" alt="{{ p.nombre }}">
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="carousel-dots" id="carouselDots">
+                    {% for p in productos %}
+                        <button class="dot {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}" aria-label="Ir a producto {{ loop.index }}"></button>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- Sección de Modelos Destacados -->
+        <section class="showcase-section">
+            <div class="showcase-header">
+                <h2>🔥 Modelos Destacados</h2>
+                <a href="{{ url_for('productos') }}" style="color: #00f3ff; text-decoration: none; font-size: 0.9rem; font-weight: 600;">Ver todos &rarr;</a>
+            </div>
+
+            <div class="featured-grid">
+                {% for p in productos %}
+                <a href="{{ url_for('vista_comprar', producto_id=p.id) }}" class="sneaker-card">
+                    {% if p.imagen %}
+                        {% if p.imagen.startswith('http://') or p.imagen.startswith('https://') %}
+                            <img src="{{ p.imagen }}" alt="{{ p.nombre }}" class="card-img-top">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='imagenes/' + p.imagen) }}" alt="{{ p.nombre }}" class="card-img-top">
+                        {% endif %}
+                    {% else %}
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80" alt="{{ p.nombre }}" class="card-img-top">
+                    {% endif %}
+                    <div class="card-body">
+                        <div>
+                            <h3>{{ p.nombre }}</h3>
+                            <p>{{ p.descripcion[:60] }}...</p>
+                        </div>
+                        <div class="card-footer-info">
+                            <span class="card-price">${{ p.precio }}</span>
+                            <button type="button" class="btn-comprar-card add-to-cart-btn"
+                                data-id="{{ p.id }}"
+                                data-nombre="{{ p.nombre }}"
+                                data-precio="{{ p.precio }}"
+                                data-talla="{{ p.talla }}"
+                                data-imagen="{{ p.imagen }}"
+                                onclick="event.preventDefault(); window.location.href='{{ url_for('vista_comprar', producto_id=p.id) }}';">
+                                Ver y Comprar <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </a>
+                {% else %}
+                <p style="color: #9ca3af; grid-column: 1 / -1; text-align: center;">No hay productos registrados todavía.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Accesos Rápidos -->
+        <section class="quick-services-section">
+            <h2><i class="fas fa-layer-group"></i> Servicios y Participación</h2>
+
+            <div class="services-grid-3">
+                <a href="{{ url_for('encuesta_modulo') }}" class="service-card-item">
+                    <div>
+                        <div class="service-icon-circle"><i class="fas fa-poll"></i></div>
+                        <h3>Encuesta de Satisfacción</h3>
+                        <p>Dinos tu opinión sobre nuestros modelos, entregas y servicio para seguir mejorando en la UPVM.</p>
+                    </div>
+                    <span class="btn-service-action">Responder encuesta <i class="fas fa-arrow-right"></i></span>
+                </a>
+
+                <a href="{{ url_for('video_modulo') }}" class="service-card-item">
+                    <div>
+                        <div class="service-icon-circle"><i class="fas fa-camera-retro"></i></div>
+                        <h3>Fotos de Entregas</h3>
+                        <p>Comparte y visualiza las fotos de tus sneakers entregados directamente en campus o a domicilio.</p>
+                    </div>
+                    <span class="btn-service-action">Ver y subir fotos <i class="fas fa-arrow-right"></i></span>
+                </a>
+
+                <a href="{{ url_for('chat_modulo') }}" class="service-card-item">
+                    <div>
+                        <div class="service-icon-circle"><i class="fas fa-comments"></i></div>
+                        <h3>Chat en Vivo con Soporte</h3>
+                        <p>Comunícate en tiempo real con asesores de Sneakers UPVM para resolver dudas sobre tus pedidos.</p>
+                    </div>
+                    <span class="btn-service-action">Abrir chat <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Apartado: Ubicación con Google Maps -->
+        <section class="location-section">
+            <h2><i class="fas fa-map-marked-alt"></i> Nos ubicamos en</h2>
+
+            <div class="location-container">
+                <div class="map-box-wrapper">
+                    <div id="mini-map"></div>
+                    {% if rol == 'admin' %}
+                    <div class="coords-input-group">
+                        <input type="text" id="latInput" placeholder="Latitud (ej. 19.6432)" value="19.6432">
+                        <input type="text" id="lngInput" placeholder="Longitud (ej. -99.1171)" value="-99.1171">
+                        <button type="button" class="btn-update-map" id="updateMapBtn">Actualizar</button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="store-info-box">
+                    <div>
+                        <h3>Sneakers UPVM - Flagship Store</h3>
+                        <ul class="store-info-list">
+                            <li><i class="fas fa-map-marker-alt"></i> <span>Av. Mexiquense S/N, Col. Villa de las Flores, Tultitlán, Estado de México.</span></li>
+                            <li><i class="fas fa-clock"></i> <span><strong>Horarios:</strong> Lunes a Viernes de 9:00 AM a 7:00 PM / Sábados de 10:00 AM a 3:00 PM.</span></li>
+                            <li><i class="fas fa-phone-alt"></i> <span><strong>Contacto:</strong> +52 (55) 1234-5678 / soporte@sneakersupvm.com</span></li>
+                            <li><i class="fas fa-shield-alt"></i> <span><strong>Servicios:</strong> Módulo de entrega segura, validación biométrica y atención a estudiantes UPVM.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Multimedia & Información de la Tienda -->
+        <section class="media-section">
+            <h2><i class="fas fa-info-circle" style="color:#00f3ff;"></i> Sobre Sneakers UPVM</h2>
+
+            <div class="media-container">
+                <div class="store-desc-box">
+                    <h3>Innovación y Estilo Universitario</h3>
+                    <p><strong>Sneakers UPVM</strong> es la plataforma oficial e innovadora desarrollada para la comunidad estudiantil de la Universidad Politécnica del Valle de México. Nuestro objetivo es ofrecer calzado exclusivo de marcas líderes combinando tecnología web avanzada, geolocalización GPS y un diseño moderno.</p>
+                    <p>Disfruta de una experiencia de compra rápida, segura y adaptada a tus necesidades académicas y cotidianas con ediciones limitadas.</p>
+
+                    <ul class="store-features-list">
+                        <li><i class="fas fa-check-circle"></i> Catálogo verificado de marcas globales (Nike, Adidas, Puma, etc.)</li>
+                        <li><i class="fas fa-check-circle"></i> Entrega segura validada mediante coordenadas GPS en campus</li>
+                        <li><i class="fas fa-check-circle"></i> Sistema interactivo con carrito, chat y encuestas en tiempo real</li>
+                    </ul>
+                </div>
+
+                <div class="video-box-wrapper">
+                <div class="video-frame-container">
+                <iframe
+                    src="https://www.youtube.com/embed/f9wHL6clP4I?si=t8XeAHBMdOZZnRlF"
+                    title="Video Promocional Sneakers UPVM"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen>
+                </iframe>
+                </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 <span>Sneakers UPVM</span>. Todos los derechos reservados.</p>
+        <p style="font-size: 0.8rem; color: #6b7280; margin-top: 3px;">Desarrollado para Ingeniería en Tecnologías de la Información e Innovación Digital.</p>
+    </footer>
+
+    <!-- Scripts de interactividad, Carrito y Google Maps API -->
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+
+        function actualizarContadorCarrito() {
+            let carrito = JSON.parse(localStorage.getItem('sneakers_carrito')) || [];
+            let totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+            $('#cartCount').text(totalItems);
+        }
+
+        $(window).on('load', function() {
+            window.scrollTo(0, 0);
+            document.activeElement.blur();
+        });
+
+        $(document).ready(function() {
+            window.scrollTo(0, 0);
+            setTimeout(() => { window.scrollTo(0, 0); }, 50);
+            setTimeout(() => { window.scrollTo(0, 0); }, 150);
+            setTimeout(() => { window.scrollTo(0, 0); }, 300);
+
+            actualizarContadorCarrito();
+
+            $('.add-to-cart-btn').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                let p = {
+                    id: $(this).data('id'),
+                    nombre: $(this).data('nombre'),
+                    precio: parseFloat($(this).data('precio')),
+                    talla: $(this).data('talla'),
+                    imagen: $(this).data('imagen'),
+                    cantidad: 1
+                };
+
+                let carrito = JSON.parse(localStorage.getItem('sneakers_carrito')) || [];
+                let index = carrito.findIndex(item => item.id == p.id && item.talla == p.talla);
+                if (index > -1) {
+                    carrito[index].cantidad += 1;
+                } else {
+                    carrito.push(p);
+                }
+
+                localStorage.setItem('sneakers_carrito', JSON.stringify(carrito));
+                actualizarContadorCarrito();
+                $('#toast-notification').fadeIn(300).delay(1500).fadeOut(300);
+            });
+        });
+
+        // 1. Lógica del Carrusel
+        const track = document.getElementById('carouselTrack');
+        const slides = document.querySelectorAll('.carousel-slide');
+        const dots = document.querySelectorAll('.dot');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const carouselWrapper = document.getElementById('sneakerCarousel');
+
+        if (track && slides.length > 0) {
+            let currentIndex = 0;
+            const totalSlides = slides.length;
+            let autoPlayInterval;
+
+            function updateCarousel(index) {
+                if (index < 0) currentIndex = totalSlides - 1;
+                else if (index >= totalSlides) currentIndex = 0;
+                else currentIndex = index;
+
+                track.style.transform = `translateX(-${currentIndex * 100}%)`;
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === currentIndex);
+                });
+            }
+
+            prevBtn.addEventListener('click', () => {
+                updateCarousel(currentIndex - 1);
+                resetAutoPlay();
+            });
+
+            nextBtn.addEventListener('click', () => {
+                updateCarousel(currentIndex + 1);
+                resetAutoPlay();
+            });
+
+            dots.forEach(dot => {
+                dot.addEventListener('click', (e) => {
+                    const idx = parseInt(e.target.getAttribute('data-index'));
+                    updateCarousel(idx);
+                    resetAutoPlay();
+                });
+            });
+
+            function startAutoPlay() {
+                autoPlayInterval = setInterval(() => {
+                    updateCarousel(currentIndex + 1);
+                }, 5000);
+            }
+
+            function resetAutoPlay() {
+                clearInterval(autoPlayInterval);
+                startAutoPlay();
+            }
+
+            carouselWrapper.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
+            carouselWrapper.addEventListener('mouseleave', startAutoPlay);
+            startAutoPlay();
+        }
+
+        // 2. Lógica del Mini Mapa con Google Maps API Oficial
+        let map;
+        let marker;
+
+        function initMap() {
+            let defaultLat = 19.6432;
+            let defaultLng = -99.1171;
+            let centerLocation = { lat: defaultLat, lng: defaultLng };
+
+            const darkMapStyle = [
+                { elementType: "geometry", stylers: [{ color: "#111827" }] },
+                { elementType: "labels.text.stroke", stylers: [{ color: "#111827" }] },
+                { elementType: "labels.text.fill", stylers: [{ color: "#9ca3af" }] },
+                {
+                    featureType: "administrative.locality",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#00f3ff" }],
+                },
+                {
+                    featureType: "poi",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#4ade80" }],
+                },
+                {
+                    featureType: "poi.park",
+                    elementType: "geometry",
+                    stylers: [{ color: "#1f2937" }],
+                },
+                {
+                    featureType: "road",
+                    elementType: "geometry",
+                    stylers: [{ color: "#374151" }],
+                },
+                {
+                    featureType: "road",
+                    elementType: "geometry.stroke",
+                    stylers: [{ color: "#1f2937" }],
+                },
+                {
+                    featureType: "road",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#9ca3af" }],
+                },
+                {
+                    featureType: "water",
+                    elementType: "geometry",
+                    stylers: [{ color: "#0b0f19" }],
+                },
+                {
+                    featureType: "water",
+                    elementType: "labels.text.fill",
+                    stylers: [{ color: "#3b82f6" }],
+                }
+            ];
+
+            map = new google.maps.Map(document.getElementById("mini-map"), {
+                center: centerLocation,
+                zoom: 15,
+                styles: darkMapStyle,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false
+            });
+
+            marker = new google.maps.Marker({
+                position: centerLocation,
+                map: map,
+                title: "Sneakers UPVM"
+            });
+
+            const infowindow = new google.maps.InfoWindow({
+                content: "<div style='color:#070913; font-family:Outfit,sans-serif;'><b>Sneakers UPVM</b><br>¡Te esperamos en el local!</div>"
+            });
+
+            marker.addListener("click", () => {
+                infowindow.open(map, marker);
+            });
+
+            const updateBtn = document.getElementById('updateMapBtn');
+            if (updateBtn) {
+                const latInput = document.getElementById('latInput');
+                const lngInput = document.getElementById('lngInput');
+
+                updateBtn.addEventListener('click', function() {
+                    let newLat = parseFloat(latInput.value);
+                    let newLng = parseFloat(lngInput.value);
+
+                    if (!isNaN(newLat) && !isNaN(newLng)) {
+                        let newPos = { lat: newLat, lng: newLng };
+                        map.setCenter(newPos);
+                        marker.setPosition(newPos);
+                        infowindow.setContent(`<div style='color:#070913; font-family:Outfit,sans-serif;'><b>Ubicación Personalizada</b><br>Lat: ${newLat}, Lng: ${newLng}</div>`);
+                        infowindow.open(map, marker);
+                    } else {
+                        alert("Por favor ingresa coordenadas válidas.");
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
